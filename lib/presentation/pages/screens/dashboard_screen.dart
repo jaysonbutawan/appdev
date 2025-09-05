@@ -13,7 +13,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
   final authProvider = appdev_auth.AuthProvider();
-  signout() async{
+  Future<void> signout() async{
     await FirebaseAuth.instance.signOut();
   }
   @override

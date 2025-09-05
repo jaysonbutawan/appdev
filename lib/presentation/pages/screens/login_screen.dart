@@ -1,6 +1,6 @@
-// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // needed for read/watch
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+import 'package:provider/provider.dart'; 
 import 'package:appdev/presentation/state/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,13 +12,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String email = '';
-  String password = '';
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      context.read<AuthProvider>().login(email, password);
-    }
+  Future<void> login() async {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(email: email.text, password: password.text);
   }
 
   @override
@@ -44,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: const InputDecoration(labelText: "Email"),
                   validator: (value) =>
                       value!.isEmpty ? "Enter your email" : null,
-                  onChanged: (value) => email = value,
+                  onChanged: (value) => email.text = value,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -52,20 +50,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                   validator: (value) =>
                       value!.isEmpty ? "Enter your password" : null,
-                  onChanged: (value) => password = value,
+                  onChanged: (value) => password.text = value,
                 ),
                 const SizedBox(height: 20),
                 auth.isLoading
                     ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _login,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
+                    : const SizedBox(
+                        height: 16,
+                      ),
+                 ElevatedButton(
+                    onPressed: login,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(200, 50),
+                      shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text("Login"),
+                        child: const Text("Login", style: TextStyle(
+                          fontSize: 18,  
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),),
+
                       ),
               ],
             ),
