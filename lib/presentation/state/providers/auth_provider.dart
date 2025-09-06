@@ -1,4 +1,3 @@
-import 'package:appdev/presentation/pages/screens/signup_screen.dart';
 import 'package:appdev/presentation/pages/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -48,8 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     validator: (value) => value!.isEmpty ? "Enter your password" : null,
                     onChanged: (value) => password.text = value,
                   ),
-
-                  // 👇 Put "Forgot Password" directly after password field
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -60,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text("Forgot Password?"),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   auth.isLoading
                       ? const CircularProgressIndicator()
                       : const SizedBox(height: 16),
@@ -73,7 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       }
                     },
-                    
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(200, 50),
                       shape: RoundedRectangleBorder(
