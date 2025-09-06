@@ -31,8 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           email: email.text,
           password: password.text,
         );
-        // You might want to add user profile update here with fullName
-        Navigator.pop(context); // Return to previous screen after successful signup
+        Navigator.pop(context);
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? "An error occurred during sign up")),

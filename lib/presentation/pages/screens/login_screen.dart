@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart'; 
 import 'package:appdev/presentation/state/providers/auth_provider.dart';
 import 'signup_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,10 +15,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
-
-  Future<void> login() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(email: email.text, password: password.text);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,22 +41,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       value!.isEmpty ? "Enter your email" : null,
                   onChanged: (value) => email.text = value,
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: "Password"),
-                  obscureText: true,
-                  validator: (value) =>
-                      value!.isEmpty ? "Enter your password" : null,
-                  onChanged: (value) => password.text = value,
-                ),
-                const SizedBox(height: 20),
-                auth.isLoading
-                    ? const CircularProgressIndicator()
-                    : const SizedBox(
-                        height: 16,
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Password"),
+                    obscureText: true,
+                    validator: (value) => value!.isEmpty ? "Enter your password" : null,
+                    onChanged: (value) => password.text = value,
+                  ),
+
+                  // 👇 Put "Forgot Password" directly after password field
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
                       ),
+                      child: const Text("Forgot Password?"),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  auth.isLoading
+                      ? const CircularProgressIndicator()
+                      : const SizedBox(height: 16),
                  ElevatedButton(
-                    onPressed: login,
+                    onPressed: context.read<AuthProvider>().isLoading ? null : () async {
+                      if (_formKey.currentState!.validate()) {
+                        await context.read<AuthProvider>().login(
+                          email: email.text,
+                          password: password.text,
+                        );
+                      }
+                    },
+                    
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(200, 50),
                       shape: RoundedRectangleBorder(
