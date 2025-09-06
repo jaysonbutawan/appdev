@@ -1,5 +1,6 @@
-// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
@@ -7,25 +8,15 @@ class AuthProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
-  Future<void> login(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Replace with your real authentication logic
-    if (email == "test@test.com" && password == "123456") {
-      _isLoggedIn = true;
-    }
-
-    _isLoading = false;
-    notifyListeners();
+  Future<void> login() async {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+  
   }
 
-  void logout() {
-    _isLoggedIn = false;
-    notifyListeners();
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart'; 
 import 'package:appdev/presentation/state/providers/auth_provider.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -72,6 +73,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.blueAccent,
                         ),),
 
+                      ),
+                      const SizedBox(height: 30),
+                      TextButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SignUpScreen())
+                          ),
+                          child: const Text("Don't have an account? Sign Up"),
                       ),
               ],
             ),

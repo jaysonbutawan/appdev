@@ -13,9 +13,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
   final authProvider = appdev_auth.AuthProvider();
-  Future<void> signout() async{
-    await FirebaseAuth.instance.signOut();
-  }
+  
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> items = [
@@ -24,11 +22,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {"title": "Settings", "icon": Icons.settings},
       {"title": "Logout", "icon": Icons.logout},
     ];
-
+    ThemeData(primaryColor: Colors.indigo);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Dashboard"),
         backgroundColor: Colors.blueAccent,
+        toolbarHeight: 20
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
