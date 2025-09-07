@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
+import 'package:get/get.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       auth = context.watch<AuthProvider>();
     } catch (e) {
-      debugPrint('AuthProvider not found in context: ' + e.toString());
+      debugPrint("AuthProvider not found in context: " + e.toString());
     }
 
     return Scaffold(
@@ -48,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 32),
 
-                  // Email Field
                   TextFormField(
                     controller: email,
                     decoration: const InputDecoration(
@@ -61,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Password Field
                   TextFormField(
                     controller: password,
                     decoration: const InputDecoration(
@@ -75,18 +74,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Forgot password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        debugPrint('Forgot Password button pressed');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const ForgotPasswordScreen()),
-                        );
+                      Get.to(() => const ForgotPasswordScreen());
                       },
                       style: TextButton.styleFrom(
                           foregroundColor: Colors.blueAccent),
@@ -94,8 +86,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Login Button
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
@@ -146,15 +136,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Sign Up Button
                   TextButton(
                     onPressed: () {
-                      debugPrint('Sign Up button pressed');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SignUpScreen()),
-                      );
+                      Get.to(() => const SignUpScreen());
                     },
                     style: TextButton.styleFrom(
                         foregroundColor: Colors.blueAccent),

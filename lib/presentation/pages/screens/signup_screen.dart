@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart'; 
 import 'package:appdev/presentation/state/providers/auth_provider.dart';
 import 'login_screen.dart';
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -18,7 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController confirmPassword = TextEditingController();
   TextEditingController fullName = TextEditingController();
 
-  Future<void> signUp() async {
+ Future<void> signUp() async {
     if (_formKey.currentState!.validate()) {
       if (password.text != confirmPassword.text) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -26,22 +28,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
         return;
       }
-      
+
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email.text,
-          password: password.text,
+        final credential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.text.trim(),
+          password: password.text.trim(),
         );
-        if(!mounted) return;
-        Navigator.pop(context);
-      } on FirebaseAuthException catch (e) {
-        if(!mounted) return;
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(credential.user!.uid)
+            .set({
+          'fullName': fullName.text.trim(),
+          'email': email.text.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? "An error occurred during sign up")),
+          const SnackBar(
+            content: Text("Account created successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Get.offAll(() => const LoginScreen());
+      } on FirebaseAuthException catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? "An error occurred during sign up"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,10 +152,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 30),
                 TextButton(
                   onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  );
+                    Get.to(() => const LoginScreen());
                 },
                 child: const Text("Already have an account? Login"),
                 ),

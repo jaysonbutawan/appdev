@@ -5,24 +5,7 @@ import 'package:get/get.dart';
 
 
 class AuthProvider extends ChangeNotifier {
-   final FirebaseAuth _auth = FirebaseAuth.instance;
-  Future<UserCredential> signUp({
-    required String email,
-    required String password,
-    required String fullName,
-  }) async {
-    try {
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      Get.offAll(() => const Wrapper());
-      return credential;
-    } on FirebaseAuthException catch (e) {
-      throw Exception(_mapErrorMessage(e));
-    }
-  }
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
@@ -52,6 +35,11 @@ class AuthProvider extends ChangeNotifier {
     Get.offAll(() => const Wrapper());
     notifyListeners();
   }
+  
+Future<void> reset(String email) async {
+  await _auth.sendPasswordResetEmail(email: email.trim());
+}
+
 
   String _mapErrorMessage(FirebaseAuthException e) {
     switch (e.code) {

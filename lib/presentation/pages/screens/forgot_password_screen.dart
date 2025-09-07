@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:appdev/presentation/state/providers/auth_provider.dart' as auth_provider ;
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -13,7 +13,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
   bool _resetSent = false;
-
+  final auth_provider.AuthProvider _authProvider = auth_provider.AuthProvider();
   Future<void> _resetPassword() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -21,9 +21,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       });
       
       try {
-        await FirebaseAuth.instance.sendPasswordResetEmail(
-          email: _emailController.text.trim(),
-        );
+        await _authProvider.reset(_emailController.text);
         setState(() {
           _resetSent = true;
           _isLoading = false;
