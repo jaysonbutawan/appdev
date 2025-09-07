@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:appdev/presentation/state/providers/auth_provider.dart'as appdev_auth;
-
+import 'package:appdev/presentation/state/providers/auth_provider.dart' as appdev_auth;
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -12,10 +11,10 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
-  final authProvider = appdev_auth.AuthProvider();
   
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<appdev_auth.AuthProvider>();
     final List<Map<String, dynamic>> items = [
       {"title": "Profile", "icon": Icons.person},
       {"title": "Messages", "icon": Icons.message},
@@ -38,15 +37,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
+          
           itemBuilder: (context, index) {
             return Card(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               elevation: 4,
               child: InkWell(
-                onTap: () {
+                onTap: () async{
                   if (items[index]['title'] == "Logout") {
-                    context.read<appdev_auth.AuthProvider>().logout();
+                    await authProvider.logout();
                   }
                 },
                 borderRadius: BorderRadius.circular(16),

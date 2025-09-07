@@ -39,7 +39,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         } else if (e.code == 'invalid-email') {
           errorMessage = "Please enter a valid email address.";
         }
-        
+        if(!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
