@@ -18,7 +18,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    AuthProvider? auth;
+    try {
+      auth = context.watch<AuthProvider>();
+    } catch (e) {
+      debugPrint('AuthProvider not found in context: ' + e.toString());
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -75,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
+                        debugPrint('Forgot Password button pressed');
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -93,23 +99,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: auth.isLoading
+                      onPressed: (auth == null || auth.isLoading)
                           ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
                                 try {
-                                  await auth.login(
+                                  await auth!.login(
                                     email: email.text.trim(),
                                     password: password.text.trim(),
                                   );
                                 } catch (e) {
                                   if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(e.toString()),
-                                        backgroundColor: Colors.red),
-                                  );
-                                }
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(e.toString()),
+                                          backgroundColor: Colors.red),
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -119,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: auth.isLoading
+                      child: (auth == null || auth.isLoading)
                           ? const SizedBox(
                               width: 24,
                               height: 24,
@@ -143,6 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Sign Up Button
                   TextButton(
                     onPressed: () {
+                      debugPrint('Sign Up button pressed');
                       Navigator.push(
                         context,
                         MaterialPageRoute(

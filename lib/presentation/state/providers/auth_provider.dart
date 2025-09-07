@@ -50,7 +50,6 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
     Get.offAll(() => const Wrapper());
-    print("User signed out");
     notifyListeners();
   }
 

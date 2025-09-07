@@ -65,14 +65,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 30),
                 TextFormField(
                   controller: fullName,
-                  decoration: const InputDecoration(labelText: "Full Name"),
+                  decoration: const InputDecoration(labelText: "Full Name",
+                  prefixIcon: Icon( Icons.person_outline),
+                  ),
                   validator: (value) =>
                       value!.isEmpty ? "Enter your full name" : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: email,
-                  decoration: const InputDecoration(labelText: "Email"),
+                  decoration: const InputDecoration(labelText: "Email",
+                  prefixIcon: Icon( Icons.email_outlined),
+                  ),
                   validator: (value) =>
                       value!.isEmpty ? "Enter your email" : null,
                   keyboardType: TextInputType.emailAddress,
@@ -80,7 +84,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: password,
-                  decoration: const InputDecoration(labelText: "Password"),
+                  decoration: const InputDecoration(labelText: "Password",
+                  prefixIcon: Icon( Icons.lock_outline),
+                  ),
                   obscureText: true,
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -94,7 +100,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: confirmPassword,
-                  decoration: const InputDecoration(labelText: "Confirm Password"),
+                  decoration: const InputDecoration(labelText: "Confirm Password",
+                  prefixIcon: Icon( Icons.lock_outline),
+                  ),
                   obscureText: true,
                   validator: (value) =>
                       value!.isEmpty ? "Confirm your password" : null,
