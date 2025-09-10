@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       auth = context.watch<AuthProvider>();
     } catch (e) {
-      debugPrint("AuthProvider not found in context: " + e.toString());
+      debugPrint("AuthProvider not found in context: $e");
     }
 
     return Scaffold(

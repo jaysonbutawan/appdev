@@ -8,11 +8,29 @@ import 'package:flutter/foundation.dart' show ChangeNotifier;
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = GoogleSignIn.instance;
   final bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
-
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  Future<UserCredential> signInWithGoogle() async {
+    await googleSignIn.initialize();
+   final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
+    if (googleUser == null) {
+    return Future.error("Sign in aborted by user");
+  }
+
+   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+   final credential = GoogleAuthProvider.credential(
+     accessToken: googleAuth.accessToken,
+     idToken: googleAuth.idToken,
+   );
+
+   return await _auth.signInWithCredential(credential);
+}
+
 
     Future<void> login({
     required String email,
@@ -41,19 +59,6 @@ class AuthProvider extends ChangeNotifier {
 Future<void> reset(String email) async {
   await _auth.sendPasswordResetEmail(email: email.trim());
 }
-
-signInWithGoogle() async {
-   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-   final GoogleSignInAuthentication? googleAuth =  googleUser?.authentication;
-
-   final credential = GoogleAuthProvider.credential(
-     accessToken: googleAuth?.accessToken,
-     idToken: googleAuth?.idToken,
-   );
-   
-   return await _auth.signInWithCredential(credential);
-}
-
 
   String _mapErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
