@@ -90,25 +90,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: (auth == null || auth.isLoading)
-                          ? null
-                          : () async {
-                              if (_formKey.currentState!.validate()) {
-                                try {
-                                  await auth!.login(
-                                    email: email.text.trim(),
-                                    password: password.text.trim(),
+                        ? null
+                        : () async {
+                            if (_formKey.currentState!.validate()) {
+                              final scaffoldMessenger = ScaffoldMessenger.of(context);
+                              try {
+                                await auth!.login(
+                                  email: email.text.trim(),
+                                  password: password.text.trim(),
+                                );
+                              } catch (e) {
+                                if (mounted) {
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: Colors.red),
                                   );
-                                } catch (e) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(e.toString()),
-                                          backgroundColor: Colors.red),
-                                    );
-                                  }
                                 }
                               }
-                            },
+                            }
+                          },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         shape: RoundedRectangleBorder(
@@ -144,6 +145,49 @@ class _LoginScreenState extends State<LoginScreen> {
                         foregroundColor: Colors.blueAccent),
                     child: const Text("Don't have an account? Sign Up"),
                   ),
+
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              "or",
+                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                            ),
+                          ),
+                          const Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      SizedBox(
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.grey),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: Image.asset(
+                            "assets/google_logo.png", 
+                            height: 24,
+                            width: 24,
+                          ),
+                          label: const Text(
+                            "Sign in with Google",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
                 ],
               ),
             ),
