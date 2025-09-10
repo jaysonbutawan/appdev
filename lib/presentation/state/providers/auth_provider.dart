@@ -13,20 +13,26 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
+  
 
   Future<UserCredential> signInWithGoogle() async {
+    
     await googleSignIn.initialize();
    final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
     if (googleUser == null) {
-    return Future.error("Sign in aborted by user");
+    throw Exception("Sign in aborted by user");
   }
 
    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-   final credential = GoogleAuthProvider.credential(
-     accessToken: googleAuth.accessToken,
-     idToken: googleAuth.idToken,
-   );
+   final authClient = await googleSignIn.authorizationForScopes(['email', 'profile']);
+  final String? accessToken = authClient?.accessToken;
+
+  final credential = GoogleAuthProvider.credential(
+    idToken: googleAuth.idToken,
+    accessToken: accessToken,
+  );
+
 
    return await _auth.signInWithCredential(credential);
 }
