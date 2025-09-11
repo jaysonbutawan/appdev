@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/widgets/auth_button.dart';
+import 'package:appdev/presentation/widgets/divider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -140,8 +141,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   AuthButton(
                     label: "Sign Up",
                     isLoading: auth.isLoading,
-                    bgColor: Colors.blueAccent,
-                    textColor: Colors.white,
                     onPressed: () => _signUp(),
                   ),
                   const SizedBox(height: 30),
@@ -149,6 +148,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextButton(
                     onPressed: () => Get.to(() => const LoginScreen()),
                     child: const Text("Already have an account? Login"),
+                  ),
+                  const DividerWithText(text: "or"),
+                  const SizedBox(height: 24),
+
+                  AuthButton(
+                    label: "Sign in with Google",
+                    icon: Image.asset('assets/search.png'),
+                    bgColor: Colors.white,
+                    textColor: Colors.black,
+                    isLoading: auth.isLoading,
+                    onPressed: () => null,
                   ),
                 ],
               ),

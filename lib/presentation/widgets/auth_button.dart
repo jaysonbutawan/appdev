@@ -13,7 +13,7 @@ class AuthButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.isLoading = false,
-    this.bgColor = Colors.blueAccent,
+    this.bgColor = const Color(0xFFFF7A30),
     this.textColor = Colors.white,
     this.icon,
   });
