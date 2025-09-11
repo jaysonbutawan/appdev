@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
-import 'package:appdev/presentation/state/providers/auth_provider.dart';
+import 'package:appdev/presentation/state/providers/auth_provider.dart'as my_auth;
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:get/get.dart';
@@ -19,12 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider? auth;
-    try {
-      auth = context.watch<AuthProvider>();
-    } catch (e) {
-      debugPrint("AuthProvider not found in context: $e");
-    }
+   final auth = context.watch<my_auth.AuthProvider>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -89,13 +85,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: (auth == null || auth.isLoading)
+                      onPressed: (auth.isLoading)
                         ? null
                         : () async {
                             if (_formKey.currentState!.validate()) {
                               final scaffoldMessenger = ScaffoldMessenger.of(context);
                               try {
-                                await auth!.login(
+                                await auth.login(
                                   email: email.text.trim(),
                                   password: password.text.trim(),
                                 );
@@ -116,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: (auth == null || auth.isLoading)
+                      child: (auth.isLoading)
                           ? const SizedBox(
                               width: 24,
                               height: 24,
@@ -160,11 +156,47 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      ElevatedButton( onPressed: () async {
-                                final authService = AuthProvider();
-                                  await authService.signInWithGoogle();
-                              },
-                      child: const Text(" Sign in with Google")),
+                    ElevatedButton(
+                                onPressed: (auth.isLoading) ? null : () async {
+                                  final scaffold = ScaffoldMessenger.of(context);
+                                  try {
+                                    UserCredential? userCredential = await auth.signInWithGoogle();
+                                
+                                      scaffold.showSnackBar(
+                                        SnackBar(content: Text('Signed in as ${userCredential?.user?.email}')),
+                                      );
+                                   
+                                  } on FirebaseAuthException catch (e) {
+                                    scaffold.showSnackBar(
+                                      SnackBar(content: Text(e.message ?? e.code), backgroundColor: Colors.red),
+                                    );
+                                  } catch (e) {
+                                    scaffold.showSnackBar(
+                                      SnackBar(content: Text('Sign-in failed: $e'), backgroundColor: Colors.red),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                child: (auth.isLoading)
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                                      )
+                                    : const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.login), 
+                                          SizedBox(width: 8),
+                                          Text('Sign in with Google'),
+                                        ],
+                                      ),
+                              ),
                 ],
               ),
             ),
