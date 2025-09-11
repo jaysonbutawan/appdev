@@ -14,12 +14,12 @@ class AuthProvider extends ChangeNotifier {
 
 Future<UserCredential?> signInWithGoogle() async {
   try{
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) {
-      throw Exception("Google sign-in was cancelled.");
-    }
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignIn googleUser =  GoogleSignIn();
+    await googleUser.signOut();
+    final GoogleSignInAccount? googleUserWithUser = await GoogleSignIn().signIn();
+    if (googleUserWithUser == null) throw Exception("Google sign-in was cancelled.");
+    final GoogleSignInAuthentication googleAuth = await googleUserWithUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
