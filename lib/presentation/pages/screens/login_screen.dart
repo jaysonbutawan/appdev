@@ -74,15 +74,14 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.flutter_dash, size: 80, color: Colors.blueAccent),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 5),
+                  Image.asset('assets/applogo.png', height: 200, color: const Color(0xFFFF7A30)),
                   Text("Welcome Back",
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           )),
-                  const SizedBox(height: 32),
-
+                  const SizedBox(height: 20),
                   CustomTextField(
                     controller: emailCtrl,
                     label: "Email",
@@ -107,14 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text("Forgot Password?"),
                     ),
                   ),
-                  const SizedBox(height: 24),
-
+                  const SizedBox(height: 20),
+                  
                   AuthButton(
                     label: "Login",
                     isLoading: auth.isLoading,
                     onPressed: () => _login(auth),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   TextButton(
                     onPressed: () => Get.to(() => const SignUpScreen()),
