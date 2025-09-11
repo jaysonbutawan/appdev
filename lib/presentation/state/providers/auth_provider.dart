@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart' show ChangeNotifier;
-
+import 'dart:async';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,32 +12,24 @@ class AuthProvider extends ChangeNotifier {
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-  
-Future<UserCredential> signInWithGoogle() async {
-  await googleSignIn.initialize();
+Future<UserCredential?> signInWithGoogle() async {
+  try{
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw Exception("Google sign-in was cancelled.");
+    }
 
-  final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
-  if (googleUser == null) {
-    throw Exception("Sign in aborted by user");
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    return await _auth.signInWithCredential(credential);
+  } catch (e) {
+    throw Exception("Google sign-in failed. Please try again.");
   }
-
-  final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-  final GoogleSignInClientAuthorization? authClient =
-      await googleSignIn.authorizationClient.authorizeScopes([
-    'email',
-    // add other needed scopes here
-  ]);
-
-  final credential = GoogleAuthProvider.credential(
-    idToken: googleAuth.idToken,
-    accessToken: authClient?.accessToken,
-  );
-
-  return await _auth.signInWithCredential(credential);
 }
-
 
 
     Future<void> login({

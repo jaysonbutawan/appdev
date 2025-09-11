@@ -162,12 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       ElevatedButton( onPressed: () async {
                                 final authService = AuthProvider();
-                                final userCredential = await authService.signInWithGoogle();
-
-                                if (userCredential != null) {
-                                  final user = userCredential.user;
-                                  debugPrint("Signed in as: ${user?.displayName}, ${user?.email}");
-                                }
+                                  await authService.signInWithGoogle();
                               },
                       child: const Text(" Sign in with Google")),
                 ],
