@@ -8,34 +8,37 @@ import 'package:flutter/foundation.dart' show ChangeNotifier;
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = GoogleSignIn.instance;
   final bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
-  
 
-  Future<UserCredential> signInWithGoogle() async {
-    
-    await googleSignIn.initialize();
-   final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
-    if (googleUser == null) {
+final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+  
+Future<UserCredential> signInWithGoogle() async {
+  await googleSignIn.initialize();
+
+  final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
+  if (googleUser == null) {
     throw Exception("Sign in aborted by user");
   }
 
-   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+  final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-   final authClient = await googleSignIn.authorizationForScopes(['email', 'profile']);
-  final String? accessToken = authClient?.accessToken;
+  final GoogleSignInClientAuthorization? authClient =
+      await googleSignIn.authorizationClient.authorizeScopes([
+    'email',
+    // add other needed scopes here
+  ]);
 
   final credential = GoogleAuthProvider.credential(
     idToken: googleAuth.idToken,
-    accessToken: accessToken,
+    accessToken: authClient?.accessToken,
   );
 
-
-   return await _auth.signInWithCredential(credential);
+  return await _auth.signInWithCredential(credential);
 }
+
 
 
     Future<void> login({
