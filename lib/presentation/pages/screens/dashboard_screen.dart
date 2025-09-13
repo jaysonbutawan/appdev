@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart'
     as appdev_auth;
 import 'package:appdev/presentation/pages/sidebar/app_side_bar.dart';
+import 'package:appdev/presentation/pages/sidebar/animated_sidebar.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -23,8 +24,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
-        title: const Text("Dashboard"),
+        backgroundColor: const Color(0xFFFF7A30),
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: double.infinity,
               ),
             ),
-            
+
             AppSidebar(
               onHome: () {
                 setState(() => _isSidebarVisible = false);
@@ -76,6 +76,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (!mounted) return;
               },
             ),
+
+            AnimatedSidebar(
+            isVisible: _isSidebarVisible,
+            onClose: () {
+              setState(() => _isSidebarVisible = false);
+            },
+            onHome: () {
+              Navigator.of(context).pushReplacementNamed('/home');
+            },
+            onSettings: () {
+              Navigator.of(context).pushReplacementNamed('/settings');
+            },
+            onLogout: () async {
+              await authProvider.logout();
+              if (!mounted) return;
+            },
+          ),
           ],
         ],
       ),
