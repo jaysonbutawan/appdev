@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart'
     as appdev_auth;
 import 'package:appdev/presentation/pages/sidebar/animated_sidebar.dart';
+import 'package:appdev/presentation/pages/cards/coffee_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -36,12 +37,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Stack(
         children: [
           // Main content
-          Center(
-            child: Text(
-              "Welcome, ${user.email}",
-              style: const TextStyle(fontSize: 18),
-            ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: ListView(
+              children: const [
+                CoffeeCard(), // 👈 call your custom card
+              ],
+        ),
           ),
+          
             AnimatedSidebar(
             isVisible: _isSidebarVisible,
             onClose: () {
