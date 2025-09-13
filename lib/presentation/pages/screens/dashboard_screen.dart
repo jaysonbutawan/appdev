@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart'
     as appdev_auth;
-import 'package:appdev/presentation/pages/sidebar/app_side_bar.dart';
 import 'package:appdev/presentation/pages/sidebar/animated_sidebar.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -43,40 +42,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: const TextStyle(fontSize: 18),
             ),
           ),
-
-          // Sidebar + overlay
-          if (_isSidebarVisible) ...[
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isSidebarVisible = false;
-                });
-              },
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-                width: double.infinity,
-                height: double.infinity,
-              ),
-            ),
-
-            AppSidebar(
-              onHome: () {
-                setState(() => _isSidebarVisible = false);
-                // Navigate to home
-                Navigator.of(context).pushReplacementNamed('/home');
-              },
-              onSettings: () {
-                setState(() => _isSidebarVisible = false);
-                // Navigate to settings
-                Navigator.of(context).pushReplacementNamed('/settings');
-              },
-              onLogout: () async {
-                setState(() => _isSidebarVisible = false);
-                await authProvider.logout();
-                if (!mounted) return;
-              },
-            ),
-
             AnimatedSidebar(
             isVisible: _isSidebarVisible,
             onClose: () {
@@ -93,7 +58,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               if (!mounted) return;
             },
           ),
-          ],
         ],
       ),
     );

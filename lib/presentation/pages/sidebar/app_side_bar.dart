@@ -19,19 +19,12 @@ class AppSidebar extends StatelessWidget {
       child: Container(
         width: 160,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.only(
+          borderRadius:  BorderRadius.only(
             topRight: Radius.circular(16),
             bottomRight: Radius.circular(16),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(3, 0),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

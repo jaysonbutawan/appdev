@@ -35,8 +35,8 @@ class _AnimatedSidebarState extends State<AnimatedSidebar>
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0), // start off-screen (left)
-      end: Offset.zero, // fully visible
+      begin: const Offset(-1.0, 0.0), // off-screen left
+      end: Offset.zero, // visible
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -47,9 +47,9 @@ class _AnimatedSidebarState extends State<AnimatedSidebar>
   void didUpdateWidget(covariant AnimatedSidebar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isVisible) {
-      _controller.forward(); // show sidebar
+      _controller.forward();
     } else {
-      _controller.reverse(); // hide sidebar
+      _controller.reverse();
     }
   }
 
@@ -63,7 +63,7 @@ class _AnimatedSidebarState extends State<AnimatedSidebar>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Overlay (fade in/out with animation)
+        // ✅ Overlay that closes sidebar when tapping main content
         if (widget.isVisible)
           GestureDetector(
             onTap: widget.onClose,
@@ -74,24 +74,15 @@ class _AnimatedSidebarState extends State<AnimatedSidebar>
             ),
           ),
 
-        // Sidebar sliding in
+        // ✅ Sidebar sliding in/out
         SlideTransition(
           position: _slideAnimation,
           child: SizedBox(
-            width: 250,
+            width: 200,
             child: AppSidebar(
-              onHome: () {
-                widget.onHome();
-                widget.onClose();
-              },
-              onSettings: () {
-                widget.onSettings();
-                widget.onClose();
-              },
-              onLogout: () async {
-                widget.onLogout();
-                widget.onClose();
-              },
+              onHome: widget.onHome,
+              onSettings: widget.onSettings,
+              onLogout: widget.onLogout,
             ),
           ),
         ),
