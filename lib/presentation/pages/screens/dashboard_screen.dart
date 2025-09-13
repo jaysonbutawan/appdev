@@ -7,6 +7,8 @@ import 'package:appdev/presentation/pages/sidebar/animated_sidebar.dart';
 import 'package:appdev/presentation/pages/cards/coffee_card.dart';
 import 'package:appdev/data/models/coffee.dart';
 import 'package:appdev/presentation/widgets/search_bar.dart';
+import 'package:get/get.dart';
+import 'add_cart_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -64,10 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             iconSize: 30,
-            onPressed: () {
-              print("Cart button pressed!");
-              Navigator.of(context).pushNamed('/cart');
-            },
+            onPressed: () => Get.to(() => const AddCartScreen()),
           ),
         ],
       ),
