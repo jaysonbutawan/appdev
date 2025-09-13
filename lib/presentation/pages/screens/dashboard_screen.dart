@@ -21,6 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final authProvider = context.read<appdev_auth.AuthProvider>();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
         title: const Text("Dashboard"),
@@ -57,20 +58,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: double.infinity,
               ),
             ),
+            
             AppSidebar(
               onHome: () {
                 setState(() => _isSidebarVisible = false);
-                // TODO: Add navigation to home
+                // Navigate to home
+                Navigator.of(context).pushReplacementNamed('/home');
               },
               onSettings: () {
                 setState(() => _isSidebarVisible = false);
-                // TODO: Add navigation to settings
+                // Navigate to settings
+                Navigator.of(context).pushReplacementNamed('/settings');
               },
               onLogout: () async {
                 setState(() => _isSidebarVisible = false);
                 await authProvider.logout();
                 if (!mounted) return;
-                Navigator.of(context).pushReplacementNamed('/login');
               },
             ),
           ],
