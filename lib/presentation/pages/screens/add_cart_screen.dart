@@ -5,15 +5,12 @@ class AddCartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return const Scaffold(
-      body:  Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-           
-          ),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFF7A30),
       ),
+
+      body: const Stack(children: [Padding(padding: EdgeInsets.all(16))]),
     );
   }
 }
