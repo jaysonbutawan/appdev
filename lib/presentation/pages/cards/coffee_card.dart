@@ -16,7 +16,6 @@ class CoffeeCard extends StatelessWidget {
     required this.category,
     required this.price,
   });
-
   @override
   Widget build(BuildContext context) {
     return AdvancedCard(

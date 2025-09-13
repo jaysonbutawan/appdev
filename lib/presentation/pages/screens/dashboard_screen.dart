@@ -5,7 +5,8 @@ import 'package:appdev/presentation/state/providers/auth_provider.dart'
     as appdev_auth;
 import 'package:appdev/presentation/pages/sidebar/animated_sidebar.dart';
 import 'package:appdev/presentation/pages/cards/coffee_card.dart';
-import 'package:appdev/data/models/Coffee.dart';
+import 'package:appdev/data/models/coffee.dart';
+import 'package:appdev/presentation/widgets/search_bar.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,6 +14,7 @@ class DashboardScreen extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
+
 final List<Coffee> coffeeList = [
   Coffee(
     title: "Classic Espresso",
@@ -37,7 +39,6 @@ final List<Coffee> coffeeList = [
   ),
 ];
 
-
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
   bool _isSidebarVisible = false;
@@ -47,38 +48,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final authProvider = context.read<appdev_auth.AuthProvider>();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: const Color(0xFFFF7A30),
         leading: IconButton(
           icon: const Icon(Icons.menu),
+          iconSize: 30,
           onPressed: () {
             setState(() {
               _isSidebarVisible = !_isSidebarVisible;
             });
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            iconSize: 30,
+            onPressed: () {
+            
+              print("Cart button pressed!");
+              Navigator.of(context).pushNamed('/cart');
+            },
+          ),
+        ],
       ),
+
       body: Stack(
         children: [
-          Container(
+          Padding(
             padding: const EdgeInsets.all(16),
-            child: ListView.builder(
-              itemCount: coffeeList.length,
-              itemBuilder: (context, index) {
-                final coffee = coffeeList[index];
-                return CoffeeCard(
-                  title: coffee.title,
-                  description: coffee.description,
-                  imageUrl: coffee.imageUrl,
-                  category: coffee.category,
-                  price: coffee.price,
-                );
-              },
+            child: Column(
+              children: [
+                SearchBarWidget(
+                  onChanged: (value) {
+                    print("Searching for: $value");
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: coffeeList.length,
+                    itemBuilder: (context, index) {
+                      final coffee = coffeeList[index];
+                      return CoffeeCard(
+                        title: coffee.title,
+                        description: coffee.description,
+                        imageUrl: coffee.imageUrl,
+                        category: coffee.category,
+                        price: coffee.price,
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-          
-            AnimatedSidebar(
+
+          // 🎬 Sidebar overlay on top
+          AnimatedSidebar(
             isVisible: _isSidebarVisible,
             onClose: () {
               setState(() => _isSidebarVisible = false);
