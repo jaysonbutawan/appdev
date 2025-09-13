@@ -42,6 +42,7 @@ final List<Coffee> coffeeList = [
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
   bool _isSidebarVisible = false;
+  final TextEditingController textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +65,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.shopping_cart),
             iconSize: 30,
             onPressed: () {
-            
               print("Cart button pressed!");
               Navigator.of(context).pushNamed('/cart');
             },
@@ -78,12 +78,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                SearchBarWidget(
+                AnimatedSearchBar(
+                  width: 350,
+                  textController: textController,
+                  onSuffixTap: () {
+                    setState(() {
+                      textController.clear();
+                    });
+                  },
                   onChanged: (value) {
                     print("Searching for: $value");
                   },
                 ),
-                const SizedBox(height: 16),
 
                 Expanded(
                   child: ListView.builder(
