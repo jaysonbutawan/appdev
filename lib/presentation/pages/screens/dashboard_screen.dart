@@ -41,8 +41,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.all(16),
             child: ListView(
               children: const [
-                CoffeeCard(), // 👈 call your custom card
-              ],
+          CoffeeCard(
+            title: "Classic Espresso",
+            description: "Strong and bold, perfect for a quick energy boost.",
+            imageUrl: "https://images.unsplash.com/photo-1510626176961-4b57d4fbad03",
+            category: "Espresso",
+            price: "\$3.00",
+          ),
+          CoffeeCard(
+            title: "Cappuccino",
+            description: "Rich espresso with steamed milk and foam.",
+            imageUrl: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
+            category: "Milk Coffee",
+            price: "\$4.50",
+          ),
+          CoffeeCard(
+            title: "Caramel Latte",
+            description: "Smooth latte with a sweet caramel twist.",
+            imageUrl: "https://images.unsplash.com/photo-1529042410759-befb1204b468",
+            category: "Flavored Coffee",
+            price: "\$5.00",
+          ),
+        ],
         ),
           ),
           
