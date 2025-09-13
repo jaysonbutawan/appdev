@@ -43,7 +43,7 @@ class CoffeeCard extends StatelessWidget {
       ],
       buttons: const [
         CardButton(
-          text: 'Checkout',
+          text: 'Add to Cart',
           style: CardButtonStyle.elevated,
           backgroundColor: Color(0xFFFF7A30),
         ),

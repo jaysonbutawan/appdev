@@ -5,6 +5,7 @@ import 'package:appdev/presentation/state/providers/auth_provider.dart'
     as appdev_auth;
 import 'package:appdev/presentation/pages/sidebar/animated_sidebar.dart';
 import 'package:appdev/presentation/pages/cards/coffee_card.dart';
+import 'package:appdev/data/models/Coffee.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,6 +13,30 @@ class DashboardScreen extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
+final List<Coffee> coffeeList = [
+  Coffee(
+    title: "Classic Espresso",
+    description: "Strong and bold, perfect for a quick energy boost.",
+    imageUrl: "https://images.unsplash.com/photo-1510626176961-4b57d4fbad03",
+    category: "Espresso",
+    price: "\$3.00",
+  ),
+  Coffee(
+    title: "Cappuccino",
+    description: "Rich espresso with steamed milk and foam.",
+    imageUrl: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
+    category: "Milk Coffee",
+    price: "\$4.50",
+  ),
+  Coffee(
+    title: "Caramel Latte",
+    description: "Smooth latte with a sweet caramel twist.",
+    imageUrl: "https://images.unsplash.com/photo-1529042410759-befb1204b468",
+    category: "Flavored Coffee",
+    price: "\$5.00",
+  ),
+];
+
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
@@ -36,34 +61,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: Stack(
         children: [
-          // Main content
           Container(
             padding: const EdgeInsets.all(16),
-            child: ListView(
-              children: const [
-          CoffeeCard(
-            title: "Classic Espresso",
-            description: "Strong and bold, perfect for a quick energy boost.",
-            imageUrl: "https://images.unsplash.com/photo-1510626176961-4b57d4fbad03",
-            category: "Espresso",
-            price: "\$3.00",
-          ),
-          CoffeeCard(
-            title: "Cappuccino",
-            description: "Rich espresso with steamed milk and foam.",
-            imageUrl: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
-            category: "Milk Coffee",
-            price: "\$4.50",
-          ),
-          CoffeeCard(
-            title: "Caramel Latte",
-            description: "Smooth latte with a sweet caramel twist.",
-            imageUrl: "https://images.unsplash.com/photo-1529042410759-befb1204b468",
-            category: "Flavored Coffee",
-            price: "\$5.00",
-          ),
-        ],
-        ),
+            child: ListView.builder(
+              itemCount: coffeeList.length,
+              itemBuilder: (context, index) {
+                final coffee = coffeeList[index];
+                return CoffeeCard(
+                  title: coffee.title,
+                  description: coffee.description,
+                  imageUrl: coffee.imageUrl,
+                  category: coffee.category,
+                  price: coffee.price,
+                );
+              },
+            ),
           ),
           
             AnimatedSidebar(
