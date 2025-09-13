@@ -12,6 +12,7 @@ class CoffeeCard extends StatelessWidget {
           'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7',
       imagePosition: ImagePosition.top,
       imageRatio: ImageRatio.oneThird,
+      shadowColor: const Color(0xFFFF7A30),
       showBookmarkIcon: true,
       title: 'Sarah Chen',
       customChips: [
@@ -26,21 +27,17 @@ class CoffeeCard extends StatelessWidget {
       iconTextPairs: const [
         IconTextPair(
           icon: Icons.work_outline,
-          text: 'Google',
-        ),
-        IconTextPair(
-          icon: Icons.location_on_outlined,
-          text: 'San Francisco',
+          text: 'Price',
         ),
       ],
       buttons: [
         CardButton(
-          text: 'Connect',
+          text: 'Checkout',
           style: CardButtonStyle.elevated,
           backgroundColor: Colors.purple[600],
         ),
         const CardButton(
-          text: 'Portfolio',
+          text: 'Add to cart',
           style: CardButtonStyle.outlined,
         ),
       ],
