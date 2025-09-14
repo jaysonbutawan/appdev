@@ -9,7 +9,7 @@ import 'package:appdev/data/models/coffee.dart';
 import 'package:appdev/presentation/widgets/search_bar.dart';
 import 'package:get/get.dart';
 import 'add_cart_screen.dart';
-import 'package:appdev/data/services/coffee_service.dart'; // coffeeApi
+import 'package:appdev/data/services/coffee_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
