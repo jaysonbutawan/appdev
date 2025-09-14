@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 class ProductCard extends StatelessWidget {
   final String name;
   final double price;
-  final VoidCallback onAddToCart;
+  final String imageUrl;
+  final int quantity;
 
   const ProductCard({
     super.key,
     required this.name,
     required this.price,
-    required this.onAddToCart,
+    required this.imageUrl,
+    this.quantity = 1,
   });
 
   @override
@@ -31,7 +33,7 @@ class ProductCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Product image placeholder
+          // Product image section
           Container(
             height: 180,
             width: double.infinity,
@@ -40,14 +42,16 @@ class ProductCard extends StatelessWidget {
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
-              color: Color(0xFFF5EBE0), // Light beige background
+              color: Color(0xFFF5EBE0), 
             ),
-            child:const Icon(
+            child: const Icon(
               Icons.coffee_maker,
               size: 80,
               color: Colors.brown,
             ),
           ),
+          
+          // Product details section
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -63,9 +67,10 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                
                 // Price
                 Text(
-                  '\$$price each',
+                  '\$${price.toStringAsFixed(2)} each',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
@@ -73,28 +78,50 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Add to cart button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onAddToCart,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                
+                // Quantity controls
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Decrease button
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.brown.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.remove, color: Colors.brown),
                       ),
                     ),
-                    child: const Text(
-                      'Add to Cart',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    
+                    // Quantity display
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        quantity.toString(),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.brown,
+                        ),
                       ),
                     ),
-                  ),
+                    
+                    // Increase button
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.brown.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.add, color: Colors.brown),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
