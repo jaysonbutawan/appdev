@@ -151,15 +151,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const DividerWithText(text: "or"),
                   const SizedBox(height: 24),
-
-                  AuthButton(
-                    label: "Sign in with Google",
-                    icon: Image.asset('assets/search.png'),
-                    bgColor: Colors.white,
-                    textColor: Colors.black,
-                    isLoading: auth.isLoading,
-                    onPressed: () => null,
-                  ),
                 ],
               ),
             ),
