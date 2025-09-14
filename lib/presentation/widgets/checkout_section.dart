@@ -15,19 +15,12 @@ class CheckoutSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -36,7 +29,7 @@ class CheckoutSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.grey,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 8),
@@ -44,7 +37,7 @@ class CheckoutSection extends StatelessWidget {
           Text(
             "\$${totalAmount.toStringAsFixed(2)}",
             style: const TextStyle(
-              fontSize: 32,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Color(0xFFFF7A30),
             ),
@@ -65,10 +58,7 @@ class CheckoutSection extends StatelessWidget {
               ),
               child: const Text(
                 "Check Out",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
