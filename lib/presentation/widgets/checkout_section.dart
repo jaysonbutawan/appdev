@@ -51,7 +51,6 @@ class CheckoutSection extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Checkout button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
