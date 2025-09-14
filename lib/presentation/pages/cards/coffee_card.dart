@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_cards/flutter_advanced_cards.dart';
+import 'dart:typed_data';
 
 class CoffeeCard extends StatelessWidget {
-  final String title;
+  final String name;
   final String description;
-  final String imageUrl;
+  final Uint8List? imageBytes;
   final String category;
   final String price;
 
   const CoffeeCard({
     super.key,
-    required this.title,
+    required this.name,
     required this.description,
-    required this.imageUrl,
+    required this.imageBytes,
     required this.category,
     required this.price,
   });
+
   @override
   Widget build(BuildContext context) {
     return AdvancedCard(
       fullWidth: true,
-      cardImage: imageUrl,
+      cardImage: imageBytes != null
+          ? Image.memory(imageBytes!, fit: BoxFit.cover)
+          : const Icon(Icons.image_not_supported, size: 100, color: Colors.grey),
       imagePosition: ImagePosition.top,
       imageRatio: ImageRatio.oneThird,
       showBookmarkIcon: true,
-      title: title,
+      title: name,
       customChips: [
         ContentChip(
           text: category,

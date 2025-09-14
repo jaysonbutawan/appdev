@@ -34,7 +34,8 @@ void initState() {
     for (var coffee in coffees) {
       print("Loaded Coffee -> "
           "ID: ${coffee.id}, "
-          "Title: ${coffee.title}, "
+          "Name: ${coffee.name}, "
+          "imageBase64: ${coffee.imageBase64.substring(0, 20)}..., " 
           "Description: ${coffee.description}, "
           "Category: ${coffee.category}, "
           "Price: ${coffee.price}");
@@ -106,9 +107,9 @@ void initState() {
                         itemBuilder: (context, index) {
                           final coffee = coffees[index];
                           return CoffeeCard(
-                            title: coffee.title,
+                            name: coffee.name,
                             description: coffee.description,
-                            imageUrl: "data:image/png;base64,${coffee.imageBase64}",
+                            imageBytes: coffee.imageBytes,
                             category: coffee.category,
                             price: coffee.price,
                           );
