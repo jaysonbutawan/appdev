@@ -24,7 +24,11 @@ class CoffeeCard extends StatelessWidget {
       fullWidth: true,
       cardImage: imageBytes != null
           ? Image.memory(imageBytes!, fit: BoxFit.cover)
-          : const Icon(Icons.image_not_supported, size: 100, color: Colors.grey),
+          : const Icon(
+              Icons.image_not_supported,
+              size: 100,
+              color: Colors.grey,
+            ),
       imagePosition: ImagePosition.top,
       imageRatio: ImageRatio.oneThird,
       showBookmarkIcon: true,
@@ -38,12 +42,7 @@ class CoffeeCard extends StatelessWidget {
       ],
       chipPosition: ContentChipPosition.rightOfTitle,
       description: description,
-      iconTextPairs: [
-        IconTextPair(
-          icon: Icons.local_cafe,
-          text: price,
-        ),
-      ],
+      iconTextPairs: [IconTextPair(icon: Icons.local_cafe, text: price)],
       buttons: const [
         CardButton(
           text: 'Add to Cart',
