@@ -9,6 +9,7 @@ import 'package:appdev/data/models/coffee.dart';
 import 'package:appdev/presentation/widgets/search_bar.dart';
 import 'package:get/get.dart';
 import 'add_cart_screen.dart';
+import 'package:appdev/data/services/coffee_service.dart'; // coffeeApi
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -17,34 +18,31 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-final List<Coffee> coffeeList = [
-  Coffee(
-    title: "Classic Espresso",
-    description: "Strong and bold, perfect for a quick energy boost.",
-    imageUrl: "https://images.unsplash.com/photo-1510626176961-4b57d4fbad03",
-    category: "Espresso",
-    price: "\$3.00",
-  ),
-  Coffee(
-    title: "Cappuccino",
-    description: "Rich espresso with steamed milk and foam.",
-    imageUrl: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
-    category: "Milk Coffee",
-    price: "\$4.50",
-  ),
-  Coffee(
-    title: "Caramel Latte",
-    description: "Smooth latte with a sweet caramel twist.",
-    imageUrl: "https://images.unsplash.com/photo-1529042410759-befb1204b468",
-    category: "Flavored Coffee",
-    price: "\$5.00",
-  ),
-];
-
 class _DashboardScreenState extends State<DashboardScreen> {
   final user = FirebaseAuth.instance.currentUser!;
   bool _isSidebarVisible = false;
   final TextEditingController textController = TextEditingController();
+
+  late Future<List<Coffee>> _coffeeFuture;
+
+@override
+void initState() {
+  super.initState();
+  _coffeeFuture = coffeeApi.getAll();
+
+  _coffeeFuture.then((coffees) {
+    for (var coffee in coffees) {
+      print("Loaded Coffee -> "
+          "ID: ${coffee.id}, "
+          "Title: ${coffee.title}, "
+          "Description: ${coffee.description}, "
+          "Category: ${coffee.category}, "
+          "Price: ${coffee.price}");
+    }
+  }).catchError((err) {
+    print("❌ Error loading coffees: $err");
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -91,16 +89,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: coffeeList.length,
-                    itemBuilder: (context, index) {
-                      final coffee = coffeeList[index];
-                      return CoffeeCard(
-                        title: coffee.title,
-                        description: coffee.description,
-                        imageUrl: coffee.imageUrl,
-                        category: coffee.category,
-                        price: coffee.price,
+                  child: FutureBuilder<List<Coffee>>(
+                    future: _coffeeFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text("No coffees found"));
+                      }
+
+                      final coffees = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: coffees.length,
+                        itemBuilder: (context, index) {
+                          final coffee = coffees[index];
+                          return CoffeeCard(
+                            title: coffee.title,
+                            description: coffee.description,
+                            imageUrl: "data:image/png;base64,${coffee.imageBase64}",
+                            category: coffee.category,
+                            price: coffee.price,
+                          );
+                        },
                       );
                     },
                   ),
@@ -109,7 +121,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // 🎬 Sidebar overlay on top
           AnimatedSidebar(
             isVisible: _isSidebarVisible,
             onClose: () {
