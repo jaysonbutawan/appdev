@@ -9,9 +9,9 @@ class AddCartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
       final List<Map<String, dynamic>> products = [
-      {"name": "Classic Espresso", "price": 3.50, "imageUrl": "", "quantity": 1},
-      {"name": "Cappuccino", "price": 4.20, "imageUrl": "", "quantity": 1},
-      {"name": "Caramel Latte", "price": 4.80, "imageUrl": "", "quantity": 1},
+      {"name": "Classic Espresso", "price": 3.50, "imageUrl": "https://images.unsplash.com/photo-1529042410759-befb1204b468", "quantity": 1},
+      {"name": "Cappuccino", "price": 4.20, "imageUrl": "https://images.unsplash.com/photo-1511920170033-5b5c5c5c5c5c", "quantity": 1},
+      {"name": "Caramel Latte", "price": 4.80, "imageUrl": "https://images.unsplash.com/photo-1511920170033-5b5c5c5c5c5c", "quantity": 1},
     ];
 
     return Scaffold(
