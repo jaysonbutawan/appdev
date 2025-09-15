@@ -8,7 +8,7 @@ class Coffee extends BaseModel {
   final String description;
   final String imageBase64;
   final String category;
-  final String price; // ✅ Better to store price as double
+  final String price;
 
   Coffee({
     required this.id,
@@ -25,19 +25,17 @@ class Coffee extends BaseModel {
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      imageBase64: json['image'] ?? '', // ✅ comes from API as base64 string
+      imageBase64: json['image'] ?? '',
       category: json['category'] ?? '',
       price: json['price']?.toString() ?? '0',
     );
   }
 
-  /// Convert base64 image into Uint8List for Image.memory
   Uint8List? get imageBytes {
     if (imageBase64.isEmpty) return null;
     try {
       return base64Decode(imageBase64);
     } catch (e) {
-      print("❌ Error decoding image for Coffee $id: $e");
       return null;
     }
   }

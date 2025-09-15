@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:appdev/presentation/pages/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'package:appdev/core/constants.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,35 +14,40 @@ class AuthProvider extends ChangeNotifier {
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-Future<UserCredential?> signInWithGoogle() async {
-  try{
-
-    final GoogleSignIn googleUser =  GoogleSignIn();
-    await googleUser.signOut();
-    final GoogleSignInAccount? googleUserWithUser = await GoogleSignIn().signIn();
-    if (googleUserWithUser == null) throw Exception("Google sign-in was cancelled.");
-    final GoogleSignInAuthentication googleAuth = await googleUserWithUser.authentication;
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    return await _auth.signInWithCredential(credential);
-  } catch (e) {
-    throw Exception("Google sign-in failed. Please try again.");
-  }
-}
-
-
-    Future<void> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<UserCredential?> signInWithGoogle() async {
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      final GoogleSignIn googleUser = GoogleSignIn();
+      await googleUser.signOut();
+      final GoogleSignInAccount? googleUserWithUser = await GoogleSignIn()
+          .signIn();
+
+      if (googleUserWithUser == null) {
+        throw Exception("Google sign-in was cancelled.");
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUserWithUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      await _saveUserToDatabase();
+
+      return userCredential;
+    } catch (e) {
+      throw Exception("Google sign-in failed. Please try again.");
+    }
+  }
+
+  Future<void> login({required String email, required String password}) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+      await _saveUserToDatabase();
+
       Get.offAll(() => const Wrapper());
       notifyListeners();
     } on FirebaseAuthException catch (e) {
@@ -55,10 +62,33 @@ Future<UserCredential?> signInWithGoogle() async {
     Get.offAll(() => const Wrapper());
     notifyListeners();
   }
-  
-Future<void> reset(String email) async {
-  await _auth.sendPasswordResetEmail(email: email.trim());
-}
+
+  Future<void> reset(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
+  Future<void> _saveUserToDatabase() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}user_api/index.php?action=save"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "firebase_uid": user.uid,
+          "email": user.email,
+          "name": user.displayName ?? "",
+          "address": null,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      debugPrint("✅ SaveUser API Response: $data");
+    } catch (e) {
+      debugPrint("❌ Error saving user: $e");
+    }
+  }
 
   String _mapErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
@@ -75,4 +105,3 @@ Future<void> reset(String email) async {
     }
   }
 }
-

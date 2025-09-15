@@ -1,8 +1,9 @@
+import 'package:appdev/core/constants.dart';
 import 'package:appdev/data/models/coffee.dart';
 import 'package:appdev/data/services/api_services.dart';
 
 final coffeeApi = ApiService<Coffee>(
-  baseUrl: "http://192.168.1.11/appdev/controller/index.php", 
+  baseUrl: "${ApiConstants.baseUrl}coffee_api/index.php", 
   model: Coffee(
     id: '',
     name: '',
