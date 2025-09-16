@@ -107,6 +107,7 @@ void initState() {
                         itemBuilder: (context, index) {
                           final coffee = coffees[index];
                           return CoffeeCard(
+                            id: coffee.id, 
                             name: coffee.name,
                             description: coffee.description,
                             imageBytes: coffee.imageBytes,
