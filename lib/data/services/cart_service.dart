@@ -4,7 +4,6 @@ import 'package:appdev/data/services/api_services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-// This service talks to your backend PHP for add_cart_products
 final cartApi = ApiService<Cart>(
   baseUrl: "${ApiConstants.baseUrl}add_cart_api/index.php", 
   model: Cart(
@@ -21,14 +20,16 @@ Future<void> addToCart(String userId, String coffeeId, int quantity) async {
   print("🛒 [DEBUG] Sending addToCart request...");
   print("➡️ firebase_uid: $userId, coffeeId: $coffeeId, quantity: $quantity");
 
-  final response = await http.post(
-    url,
-    body: {
-      "firebase_uid": userId, // ✅ match backend param
-      "coffee_id": coffeeId,
-      "quantity": quantity.toString(),
-    },
-  );
+ final response = await http.post(
+  url,
+  headers: {"Content-Type": "application/json"},
+  body: jsonEncode({
+    "firebase_uid": userId,
+    "coffee_id": coffeeId,
+    "quantity": quantity,
+  }),
+);
+
 
   print("📥 [DEBUG] Response status: ${response.statusCode}");
   print("📥 [DEBUG] Raw response body: ${response.body}");

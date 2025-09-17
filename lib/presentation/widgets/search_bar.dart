@@ -19,8 +19,8 @@ class AnimatedSearchBar extends StatefulWidget {
     required this.onSuffixTap,
     this.autoFocus = false,
     this.closeOnSuffixTap = false,
-    this.prefixIcon = const Icon(Icons.search, color: Colors.grey),
-    this.suffixIcon = const Icon(Icons.clear, color: Colors.grey),
+    this.prefixIcon = const Icon(Icons.search, color: Color(0xFFFF9A00)),
+    this.suffixIcon = const Icon(Icons.clear, color: Color(0xFFFF9A00)),
     this.animationDurationInMilli = 375,
     this.helpText = "Search...",
     this.onChanged,
@@ -42,7 +42,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
           width: _isExpanded ? widget.width : 50,
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color.fromARGB(255, 113, 52, 2), // brown bg
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -60,10 +60,19 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
                   child: TextField(
                     controller: widget.textController,
                     autofocus: widget.autoFocus,
+                    style: const TextStyle(
+                      color: Color(0xFFFF9A00) // ✅ text color white
+                    ),
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color.fromARGB(255, 113, 52, 2),
                       hintText: widget.helpText,
+                      hintStyle: const TextStyle(
+                        color: Color(0xFFFF9A00), 
+                      ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     ),
                     onChanged: widget.onChanged,
                   ),

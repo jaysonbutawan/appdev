@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_cards/flutter_advanced_cards.dart';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appdev/data/services/cart_service.dart';
 
-
 class CoffeeCard extends StatelessWidget {
   final String id;
   final String name;
-  final String description;
   final Uint8List? imageBytes;
   final String category;
   final String price;
@@ -17,67 +14,125 @@ class CoffeeCard extends StatelessWidget {
     super.key,
     required this.id,
     required this.name,
-    required this.description,
     required this.imageBytes,
     required this.category,
     required this.price,
   });
+
   Future<void> _handleAddToCart(BuildContext context) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("You must be logged in")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("You must be logged in")));
         return;
       }
 
-      // Call our addToCart function
       await addToCart(user.uid, id, 1);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("$name added to cart")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("$name added to cart")));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to add to cart: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to add to cart: $e")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AdvancedCard(
-      fullWidth: true,
-      cardImage: imageBytes != null
-          ? Image.memory(imageBytes!, fit: BoxFit.cover)
-          : const Icon(
-              Icons.image_not_supported,
-              size: 100,
-              color: Colors.grey,
+    return Container(
+      width: 150,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 48, 30, 4),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.5),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Image container
+          Container(
+            height: 110,
+            width: 110,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+                bottomLeft: Radius.circular(5),
+                bottomRight: Radius.circular(5),
+              ),
+              color: Colors.white,
             ),
-      imagePosition: ImagePosition.top,
-      imageRatio: ImageRatio.oneThird,
-      showBookmarkIcon: true,
-      title: name,
-      customChips: [
-        ContentChip(
-          text: category,
-          backgroundColor: Colors.brown[600],
-          textColor: Colors.white,
-        ),
-      ],
-      chipPosition: ContentChipPosition.rightOfTitle,
-      description: description,
-      iconTextPairs: [IconTextPair(icon: Icons.local_cafe, text: price)],
-      buttons:  [
-        CardButton(
-          text: 'Add to Cart',
-          style: CardButtonStyle.elevated,
-          backgroundColor:const Color(0xFFFF7A30),
-          onPressed:() => _handleAddToCart(context),
-        ),
-      ],
+            child: imageBytes != null
+                ? ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    child: Image.memory(imageBytes!, fit: BoxFit.cover),
+                  )
+                : const Icon(
+                    Icons.image_not_supported,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "\$$price",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        onPressed: () => _handleAddToCart(context),
+                        icon: const Icon(Icons.add_shopping_cart),
+                        color:const Color(0xFFFF9A00),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

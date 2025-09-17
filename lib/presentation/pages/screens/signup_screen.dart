@@ -7,8 +7,6 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/widgets/auth_button.dart';
-import 'package:appdev/presentation/widgets/divider.dart';
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -86,16 +84,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.flutter_dash,
-                      size: 80, color: Colors.blueAccent),
-                  const SizedBox(height: 20),
+                   const SizedBox(height: 5),
+                  Image.asset(
+                    'assets/applogo.png',
+                    height: 200,
+                    color: const Color.fromARGB(255, 113, 52, 2),
+                  ),
                   Text(
                     "Create Account",
                     textAlign: TextAlign.center,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                        ?.copyWith(fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 113, 52, 2)),
                   ),
                   const SizedBox(height: 30),
 
@@ -136,21 +137,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     validator: (v) =>
                         v!.isEmpty ? "Confirm your password" : null,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 34),
 
                   AuthButton(
                     label: "Sign Up",
                     isLoading: auth.isLoading,
                     onPressed: () => _signUp(),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
                   TextButton(
                     onPressed: () => Get.to(() => const LoginScreen()),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF493628),
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
                     child: const Text("Already have an account? Login"),
                   ),
-                  const DividerWithText(text: "or"),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),

@@ -22,7 +22,7 @@ class AuthProvider extends ChangeNotifier {
           .signIn();
 
       if (googleUserWithUser == null) {
-        throw Exception("Google sign-in was cancelled.");
+        return null;
       }
 
       final GoogleSignInAuthentication googleAuth =
@@ -38,7 +38,7 @@ class AuthProvider extends ChangeNotifier {
 
       return userCredential;
     } catch (e) {
-      throw Exception("Google sign-in failed. Please try again.");
+      return null;
     }
   }
 
