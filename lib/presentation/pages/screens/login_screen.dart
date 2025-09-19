@@ -1,15 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:appdev/presentation/state/providers/auth_provider.dart' as my_auth;
+import 'package:appdev/presentation/state/providers/auth_provider.dart'
+    as my_auth;
 import 'package:get/get.dart';
-
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/widgets/auth_button.dart';
 import 'package:appdev/presentation/widgets/divider.dart';
-import 'package:appdev/presentation/widgets/loading_widget.dart'; // ✅ merged handler
+import 'package:appdev/presentation/widgets/loading_widget.dart';
+import 'package:appdev/presentation/widgets/dialog_helper.dart';
+import 'package:appdev/presentation/pages/wrappers/wrapper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,42 +25,40 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordCtrl = TextEditingController();
 
   Future<void> _login(my_auth.AuthProvider auth) async {
-    final messenger = ScaffoldMessenger.of(context);
     if (_formKey.currentState!.validate()) {
       try {
         await auth.login(
           email: emailCtrl.text.trim(),
           password: passwordCtrl.text.trim(),
         );
+        if (mounted) {
+          DialogHelper.showSuccess(
+            context,
+            "Welcome back!",
+            onOk: () => Get.offAll(() => const Wrapper()),
+          );
+        }
       } catch (e) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-        );
+        if (mounted) {
+          DialogHelper.showError(context, e.toString());
+        }
       }
     }
   }
 
   Future<void> _signInWithGoogle(my_auth.AuthProvider auth) async {
-    final messenger = ScaffoldMessenger.of(context);
     try {
-      UserCredential? user = await auth.signInWithGoogle();
-      messenger.showSnackBar(
-        SnackBar(content: Text('Signed in as ${user?.user?.email}')),
-      );
-    } on FirebaseAuthException catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? e.code),
-          backgroundColor: Colors.red,
-        ),
-      );
+      await auth.signInWithGoogle();
+      if (mounted) {
+        DialogHelper.showSuccess(
+          context,
+          "Signed in with Google successfully!",
+        );
+      }
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Sign-in failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        DialogHelper.showError(context, "Google Sign-in failed: $e");
+      }
     }
   }
 
@@ -68,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.watch<my_auth.AuthProvider>();
 
     return AppStateHandler(
-      isLoading: auth.isLoading, // ✅ loader + internet checker combined
+      isLoading: auth.isLoading,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -91,9 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Welcome Back",
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: const Color.fromARGB(255, 113, 52, 2),
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 113, 52, 2),
+                      ),
                     ),
                     const SizedBox(height: 20),
 
@@ -101,8 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: emailCtrl,
                       label: "Email",
                       icon: Icons.email_outlined,
-                      validator: (v) =>
-                          v!.isEmpty ? "Enter your email" : null,
+                      validator: (v) => v!.isEmpty ? "Enter your email" : null,
                     ),
                     const SizedBox(height: 20),
 

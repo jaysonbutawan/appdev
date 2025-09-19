@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'add_cart_screen.dart';
 import 'package:appdev/data/services/coffee_service.dart';
 import 'package:appdev/core/themes/app_gradient.dart';
+import 'package:appdev/presentation/pages/wrappers/draggable_fab_wrapper.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -51,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final authProvider = context.read<appdev_auth.AuthProvider>();
 
     return Scaffold(
-      extendBodyBehindAppBar: true, // let gradient go behind icons
+      extendBodyBehindAppBar: true,
       body: Container(
         decoration: const BoxDecoration(
           gradient: AppGradients.mainBackground,
@@ -59,7 +60,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: SafeArea(
           child: Stack(
             children: [
-              /// Custom top bar (instead of AppBar)
               Positioned(
                 top: 0,
                 left: 0,
@@ -142,6 +142,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             itemBuilder: (context, index) {
                               final coffee = coffees[index];
                               return CoffeeCard(
+                                description: coffee.description,
                                 id: coffee.id,
                                 name: coffee.name,
                                 imageBytes: coffee.imageBytes,
@@ -156,6 +157,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
               ),
+
+              
 
               /// Sidebar
               AnimatedSidebar(
@@ -174,6 +177,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   if (!mounted) return;
                 },
               ),
+              const DraggableFabWrapper(),
+            
             ],
           ),
         ),
