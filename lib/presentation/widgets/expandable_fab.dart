@@ -65,12 +65,13 @@ class FloatingActionBar extends StatelessWidget {
         ),
       ],
 
-      child: Image.asset(
-        'assets/cup.png',
-        height: 28,
-        width: 28,
-        color: foregroundColor,
-      ),
+   child: FittedBox(
+  child: Image.asset(
+    'assets/cup.png',
+    color: foregroundColor,
+  ),
+),
+
     );
   }
 }

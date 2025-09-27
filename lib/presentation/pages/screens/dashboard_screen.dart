@@ -109,7 +109,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    /// ✅ FIXED FutureBuilder closing
                     Expanded(
                       child: FutureBuilder<List<Coffee>>(
                         future: _coffeeFuture,

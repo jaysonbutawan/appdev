@@ -86,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: [
                    const SizedBox(height: 5),
                   Image.asset(
-                    'assets/applogo.png',
+                    'assets/main_logo.png',
                     height: 200,
                     color: const Color.fromARGB(255, 113, 52, 2),
                   ),

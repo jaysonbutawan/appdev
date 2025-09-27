@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appdev/data/services/cart_service.dart';
 import 'package:appdev/presentation/pages/screens/coffee_details_screen.dart';
+import 'package:appdev/data/models/product.dart';
 class CoffeeCard extends StatelessWidget {
   final String id;
   final String name;
@@ -48,19 +49,22 @@ class CoffeeCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         /// ✅ Navigate to ProductDetailScreen and pass data
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-              id: id,
-              name: name,
-              imageBytes: imageBytes,
-              category: category,
-              price: price,
-              description: description,
-            ),
-          ),
-        );
+     Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ProductDetailScreen(
+      product: Product(
+        id: id,
+        name: name,
+        imageBytes: imageBytes,
+        category: category,
+        price: price,
+        description: description,
+      ),
+    ),
+  ),
+);
+
       },
       child: Container(
         width: 150,

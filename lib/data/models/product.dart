@@ -1,36 +1,19 @@
+import 'dart:typed_data';
+
 class Product {
+  final String id;
   final String name;
-  final double price;
-  final String imageUrl;
-  int quantity;
-  
+  final Uint8List? imageBytes;
+  final String category;
+  final String price;
+  final String description;
+
   Product({
+    required this.id,
     required this.name,
+    required this.imageBytes,
+    required this.category,
     required this.price,
-    required this.imageUrl,
-    this.quantity = 1, 
+    required this.description,
   });
-
-  double get totalPrice => price * quantity;
-
-  // Convert Product to JSON for Firebase
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'price': price,
-      'imageUrl': imageUrl,
-      'quantity': quantity,
-      'totalPrice': totalPrice,
-    };
-  }
-
-  // Factory constructor for fetching from Firebase
-  factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      name: json['name'],
-      price: json['price'].toDouble(),
-      imageUrl: json['imageUrl'],
-      quantity: json['quantity'],
-    );
-  }
 }
