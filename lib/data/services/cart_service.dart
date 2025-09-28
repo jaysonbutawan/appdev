@@ -5,51 +5,53 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 final cartApi = ApiService<Cart>(
-  baseUrl: "${ApiConstants.baseUrl}add_cart_api/index.php", 
-  model: Cart(
-    id: '',
-    userId: '',
-    coffeeId: '',
-    quantity: 0,
-  ),
+  baseUrl: "${ApiConstants.baseUrl}add_cart_api/index.php",
+  model: Cart(id: '', userId: '', coffeeId: '', quantity: 0),
 );
 
-Future<void> addToCart(String userId, String coffeeId, int quantity) async {
-  final url = Uri.parse("${ApiConstants.baseUrl}add_cart_api/index.php?action=add");
+Future<void> addToCart(
+  String firebaseUid,
+  String coffeeId,
+  int quantity,
+) async {
+  final url = Uri.parse(
+    "${ApiConstants.baseUrl}add_cart_api/index.php?action=add",
+  );
 
-  print("🛒 [DEBUG] Sending addToCart request...");
-  print("➡️ firebase_uid: $userId, coffeeId: $coffeeId, quantity: $quantity");
-
- final response = await http.post(
-  url,
-  headers: {"Content-Type": "application/json"},
-  body: jsonEncode({
-    "firebase_uid": userId,
-    "coffee_id": coffeeId,
-    "quantity": quantity,
-  }),
-);
-
-
-  print("📥 [DEBUG] Response status: ${response.statusCode}");
-  print("📥 [DEBUG] Raw response body: ${response.body}");
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "firebase_uid": firebaseUid,
+      "coffee_id": coffeeId,
+      "quantity": quantity,
+    }),
+  );
 
   if (response.statusCode != 200) {
     throw Exception("Failed to add to cart: ${response.body}");
   }
-
-  final data = jsonDecode(response.body);
-  print("📦 [DEBUG] Parsed response: $data"); // 👈 place it here
-
-  if (data["status"] != "success") {
-    throw Exception("Error from server: ${data["message"]}");
-  }
-
-  print("✅ [DEBUG] Product successfully added to cart");
 }
 
+Future<List<Cart>> getUserCart(String firebaseUid) async {
+  try {
+    final response = await http.post(
+      Uri.parse("${ApiConstants.baseUrl}add_cart_api/index.php?action=get"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"firebase_uid": firebaseUid}),
+    );
 
-// Function to get all cart items of a user
-Future<List<Cart>> getUserCart(String userId) async {
-  return cartApi.getAll(action: "list&user_id=$userId");
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is Map<String, dynamic>) {
+        final List<dynamic> list = decoded["data"] ?? [];
+        return list.map((item) => Cart.fromJson(item)).toList();
+      }
+    }
+
+    return [];
+  } catch (e) {
+    return [];
+  }
 }

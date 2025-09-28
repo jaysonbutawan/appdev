@@ -30,7 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _coffeeFuture = coffeeApi.getAll();
+    _coffeeFuture = CoffeeApi().getAllCoffees();
 
     _coffeeFuture.then((coffees) {
       for (var coffee in coffees) {
@@ -90,7 +90,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
 
-              /// Main content
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 70, 16, 16),
                 child: Column(
@@ -131,11 +130,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             padding: const EdgeInsets.all(12),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2, // ✅ two columns
+                              crossAxisCount: 2, 
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
                               childAspectRatio:
-                                  0.75, // ✅ controls height/width ratio
+                                  0.75, 
                             ),
                             itemCount: coffees.length,
                             itemBuilder: (context, index) {
@@ -159,7 +158,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               
 
-              /// Sidebar
               AnimatedSidebar(
                 isVisible: _isSidebarVisible,
                 onClose: () {

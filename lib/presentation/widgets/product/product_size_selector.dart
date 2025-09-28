@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 
-class ProductSizeSelector extends StatelessWidget {
+class ProductSizeSelector extends StatefulWidget {
   const ProductSizeSelector({super.key});
 
   @override
+  State<ProductSizeSelector> createState() => _ProductSizeSelectorState();
+}
+
+class _ProductSizeSelectorState extends State<ProductSizeSelector> {
+  String? _selectedSize;
+
+  final List<String> sizes = ["Small", "Medium", "Large"];
+
+  @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
@@ -13,24 +22,37 @@ class ProductSizeSelector extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: Colors.white
           ),
         ),
         const SizedBox(height: 16),
         Row(
-          children: [
-            _SizeOption(label: 'Medium', isSelected: true, highlightColor: const Color(0xFFFF7A30)),
-            const SizedBox(width: 12),
-            _SizeOption(label: 'Small'),
-            const SizedBox(width: 12),
-            _SizeOption(label: 'Large'),
-          ],
+          children: sizes.map((size) {
+            final isSelected = _selectedSize == size;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedSize = size; // only one can be selected
+                  });
+                },
+                child: _SizeOption(
+                  label: size,
+                  isSelected: isSelected,
+                  highlightColor: const Color(0xFFFF7A30),
+                ),
+              ),
+            );
+          }).toList(),
         ),
         const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.only(left: 4),
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
           child: Text(
-            'Medium selected',
-            style: TextStyle(
+            _selectedSize == null
+                ? 'No size selected'
+                : 'Selected: $_selectedSize',
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.grey,
             ),
@@ -54,24 +76,23 @@ class _SizeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? highlightColor.withOpacity(0.1) : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? highlightColor : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 6), // spacing between boxes
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: isSelected ? highlightColor.withOpacity(0.1) : Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? highlightColor : Colors.grey[300]!,
+          width: isSelected ? 2 : 1,
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? highlightColor : Colors.grey,
-            ),
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? highlightColor : Colors.grey,
           ),
         ),
       ),

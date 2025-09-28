@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:appdev/data/services/cart_service.dart';
+import 'package:appdev/utils/cart_helper.dart';
 import 'package:appdev/presentation/pages/screens/coffee_details_screen.dart';
 import 'package:appdev/data/models/product.dart';
 class CoffeeCard extends StatelessWidget {
@@ -22,33 +21,10 @@ class CoffeeCard extends StatelessWidget {
     required this.description,
   });
 
-  Future<void> _handleAddToCart(BuildContext context) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("You must be logged in")));
-        return;
-      }
-
-      await addToCart(user.uid, id, 1);
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("$name added to cart")));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Failed to add to cart: $e")));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        /// ✅ Navigate to ProductDetailScreen and pass data
      Navigator.push(
   context,
   MaterialPageRoute(
@@ -83,7 +59,6 @@ class CoffeeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Image container
             Container(
               height: 110,
               width: 110,
@@ -143,7 +118,7 @@ class CoffeeCard extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerRight,
                         child: IconButton(
-                          onPressed: () => _handleAddToCart(context),
+                         onPressed: () => handleAddToCart(context, id, name),
                           icon: const Icon(Icons.add_shopping_cart),
                           color: const Color(0xFFFF9A00),
                         ),

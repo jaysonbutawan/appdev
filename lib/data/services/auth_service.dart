@@ -18,7 +18,7 @@ class AuthService {
 
   Future<UserCredential?> signInWithGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
-    await googleSignIn.signOut(); // fresh sign in
+    await googleSignIn.signOut(); 
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) return null;

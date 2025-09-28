@@ -8,21 +8,44 @@ class ApiService<T extends BaseModel> {
 
   ApiService({required this.baseUrl, required this.model});
 
-  Future<List<T>> getAll({String action = "all"}) async {
-    final response = await http.get(Uri.parse("$baseUrl?action=$action"));
+  Future<List<T>> getAll({
+    String action = "all",
+    Map<String, String>? queryParams,
+  }) async {
+    final uri = Uri.parse(
+      baseUrl,
+    ).replace(queryParameters: {"action": action, ...?queryParams});
+
+    final response = await http.get(uri);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return (data["data"] as List)
-          .map((item) => model.fromJson(item) as T)
-          .toList();
+      if (response.body.isEmpty) {
+        return [];
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is Map<String, dynamic>) {
+        final List<dynamic> list = decoded["data"] ?? [];
+        return list.map((item) => model.fromJson(item) as T).toList();
+      }
+
+      if (decoded is List) {
+        return decoded.map((item) => model.fromJson(item) as T).toList();
+      }
+
+      return [];
     } else {
-      throw Exception("Failed to load data from $baseUrl");
+      throw Exception("Failed to load data: ${response.statusCode}");
     }
   }
 
   Future<T> getById(String id, {String action = "single"}) async {
-    final response = await http.get(Uri.parse("$baseUrl?action=$action&id=$id"));
+    final uri = Uri.parse(
+      baseUrl,
+    ).replace(queryParameters: {"action": action, "id": id});
+
+    final response = await http.get(uri);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -30,5 +53,31 @@ class ApiService<T extends BaseModel> {
     } else {
       throw Exception("Failed to load item with id $id");
     }
+  }
+
+  Future<List<T>> postAll({
+    String action = "",
+    Map<String, dynamic>? body,
+  }) async {
+    final uri = Uri.parse(baseUrl).replace(queryParameters: {"action": action});
+
+    final response = await http.post(
+      uri,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body ?? {}),
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        final List<dynamic> list = decoded["data"] ?? [];
+        return list.map((item) => model.fromJson(item) as T).toList();
+      }
+      if (decoded is List) {
+        return decoded.map((item) => model.fromJson(item) as T).toList();
+      }
+    }
+
+    throw Exception("Failed to load data: ${response.statusCode}");
   }
 }

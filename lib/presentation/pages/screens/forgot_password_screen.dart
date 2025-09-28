@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart' as auth_provider;
 import 'package:appdev/presentation/widgets/auth_button.dart';
-import 'package:appdev/presentation/widgets/loading_widget.dart'; // ✅ new merged widget
+import 'package:appdev/presentation/widgets/loading_widget.dart'; 
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

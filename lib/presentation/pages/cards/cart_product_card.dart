@@ -1,16 +1,19 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatelessWidget {
   final String name;
   final double price;
-  final String imageUrl;
+  final String? imageUrl;
+  final Uint8List? imageBytes;
   final int quantity;
 
   const ProductCard({
     super.key,
     required this.name,
     required this.price,
-    required this.imageUrl,
+    this.imageUrl,
+    this.imageBytes,
     this.quantity = 1,
   });
 
@@ -31,28 +34,9 @@ class ProductCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 100,
-                      width: 100,
-                      color: Colors.brown.withOpacity(0.1),
-                      child: const Icon(
-                        Icons.coffee,
-                        color: Colors.brown,
-                        size: 40,
-                      ),
-                    );
-                  },
-                ),
+                child: _buildImage(),
               ),
-
               const SizedBox(width: 16),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +59,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     Row(
                       children: [
                         IconButton(
@@ -131,6 +114,38 @@ class ProductCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildImage() {
+    if (imageBytes != null) {
+      return Image.memory(
+        imageBytes!,
+        height: 100,
+        width: 100,
+        fit: BoxFit.cover,
+      );
+    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return Image.network(
+        imageUrl!,
+        height: 100,
+        width: 100,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _fallbackImage();
+        },
+      );
+    } else {
+      return _fallbackImage();
+    }
+  }
+
+  Widget _fallbackImage() {
+    return Container(
+      height: 100,
+      width: 100,
+      color: Colors.brown.withOpacity(0.1),
+      child: const Icon(Icons.coffee, color: Colors.brown, size: 40),
     );
   }
 }
