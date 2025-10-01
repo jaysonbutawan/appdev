@@ -22,7 +22,7 @@ dependencies:
   connectivity_plus: ^6.0.3
   flutter_speed_dial: ^7.0.0
   awesome_dialog: ^3.2.1
-
+  quickalert: ^1.1.0
 
 dev_dependencies:
   flutter_test:

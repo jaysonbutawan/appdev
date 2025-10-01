@@ -1,9 +1,11 @@
+import 'package:appdev/presentation/pages/screens/checkout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:appdev/data/models/cart.dart';
 import 'package:appdev/data/services/cart_service.dart';
 import 'package:appdev/presentation/pages/cards/cart_product_card.dart';
 import 'package:appdev/presentation/widgets/checkout_section.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:appdev/core/themes/app_gradient.dart';
 
 class AddCartScreen extends StatefulWidget {
   const AddCartScreen({super.key});
@@ -46,20 +48,34 @@ class _AddCartScreenState extends State<AddCartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFF7A30),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppGradients.mainBackground,
+          ),
+        ),
         title: const Text(
           "Your Cart",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
+          : Container(
+              decoration: const BoxDecoration(
+                gradient: AppGradients.mainBackground,
+              ),
+              child: 
+          Column(
               children: [
+                if (_cartItems.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      "Your cart is empty.",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -83,13 +99,14 @@ class _AddCartScreenState extends State<AddCartScreen> {
                 CheckoutSection(
                   totalAmount: totalAmount,
                   onCheckout: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Proceeding to Checkout...")),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const CheckoutScreen()));
                   },
                 ),
-              ],
+                const SizedBox(height: 10),
+                ],
             ),
+          ),
     );
   }
 }
+

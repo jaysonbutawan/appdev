@@ -4,6 +4,7 @@ import 'package:appdev/data/models/coffee.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+
 class CoffeeApi {
   final ApiService<Coffee> _api = ApiService<Coffee>(
     baseUrl: "${ApiConstants.baseUrl}coffee_api/index.php",
@@ -57,4 +58,18 @@ class CoffeeApi {
     }
     return false;
   }
+
+  Future<List<Coffee>> searchCoffees(String query) async {
+  final response = await http.get(
+    Uri.parse("${ApiConstants.baseUrl}coffee_api/index.php?action=search&q=$query"),
+  );
+
+  if (response.statusCode == 200) {
+    final jsonData = jsonDecode(response.body);
+    final List coffees = jsonData["data"];
+    return coffees.map((e) => Coffee.fromJson(e)).toList();
+  } else {
+    throw Exception("Failed to search coffees");
+  }
+}
 }

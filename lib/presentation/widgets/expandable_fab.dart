@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:appdev/presentation/pages/screens/favorite_screen.dart';
 
 class FloatingActionBar extends StatelessWidget {
   final Color? backgroundColor;
@@ -14,10 +15,7 @@ class FloatingActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SpeedDial(
-      activeChild: const Icon(
-        Icons.close,
-        color: Colors.white,
-      ),
+      activeChild: const Icon(Icons.close, color: Colors.white),
 
       backgroundColor: backgroundColor,
       overlayColor: Colors.black,
@@ -29,49 +27,39 @@ class FloatingActionBar extends StatelessWidget {
       spaceBetweenChildren: 12,
       openCloseDial: ValueNotifier<bool>(false),
       children: [
-        // Remind button
-        SpeedDialChild(
-          child: const Icon(Icons.notifications),
-          label: 'Remind',
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          onTap: () => debugPrint("🔔 Remind clicked"),
-        ),
-        
-        // Email button
         SpeedDialChild(
           child: const Icon(Icons.email),
-          label: 'Email',
-          backgroundColor: Colors.green,
+          label: 'Order',
+          backgroundColor: const Color.fromARGB(255, 160, 68, 14),
           foregroundColor: Colors.white,
-          onTap: () => debugPrint("📧 Email clicked"),
+          onTap: () => debugPrint("✉️ Email clicked"),
         ),
-        
-        // Star button
+
         SpeedDialChild(
-          child: const Icon(Icons.star),
-          label: 'Star',
-          backgroundColor: Colors.amber,
+          child: const Icon(Icons.favorite),
+          label: 'Favorite',
+          backgroundColor: const Color.fromARGB(255, 142, 94, 60),
           foregroundColor: Colors.white,
-          onTap: () => debugPrint("⭐ Star clicked"),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyWidget()),
+            );
+          },
         ),
-        
-        // Add button
+
         SpeedDialChild(
-          child: const Icon(Icons.add),
-          backgroundColor: Colors.red,
+          child: const Icon(Icons.notifications),
+          label: 'Notify',
+          backgroundColor: const Color.fromARGB(255, 24, 113, 8),
           foregroundColor: Colors.white,
           onTap: () => debugPrint("➕ Add clicked"),
         ),
       ],
 
-   child: FittedBox(
-  child: Image.asset(
-    'assets/cup.png',
-    color: foregroundColor,
-  ),
-),
-
+      child: FittedBox(
+        child: Image.asset('assets/cup.png', color: foregroundColor),
+      ),
     );
   }
 }

@@ -1,7 +1,14 @@
-linter:
+analyzer:
+  errors:
+    avoid_print: ignore
+    unused_import: error
+    unused_local_variable: warning
 
+  exclude:
+    - build/**
+    - "**/*.g.dart"
+
+linter:
   rules:
-  
-     avoid_print: false
-     prefer_const_constructors: true
-   
+    - prefer_const_constructors
+    - avoid_unused_constructor_parameters

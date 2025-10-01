@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart';
 import 'login_screen.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/widgets/auth_button.dart';
 class SignUpScreen extends StatefulWidget {
@@ -32,20 +31,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       try {
-        final credential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailCtrl.text.trim(),
           password: passwordCtrl.text.trim(),
         );
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(credential.user!.uid)
-            .set({
-          'fullName': fullNameCtrl.text.trim(),
-          'email': emailCtrl.text.trim(),
-          'createdAt': FieldValue.serverTimestamp(),
-        });
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -98,15 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         .titleLarge
                         ?.copyWith(fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 113, 52, 2)),
                   ),
-                  const SizedBox(height: 30),
-
-                  CustomTextField(
-                    controller: fullNameCtrl,
-                    label: "Full Name",
-                    icon: Icons.person_outline,
-                    validator: (v) => v!.isEmpty ? "Enter your full name" : null,
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 30),   
 
                   CustomTextField(
                     controller: emailCtrl,

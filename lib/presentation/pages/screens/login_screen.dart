@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:appdev/presentation/state/providers/auth_provider.dart'
-    as my_auth;
 import 'package:get/get.dart';
+import 'package:quickalert/quickalert.dart';
+
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
+import 'package:appdev/presentation/state/providers/auth_provider.dart' as my_auth;
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/widgets/auth_button.dart';
 import 'package:appdev/presentation/widgets/divider.dart';
 import 'package:appdev/presentation/widgets/loading_widget.dart';
-import 'package:appdev/presentation/widgets/dialog_helper.dart';
-import 'package:appdev/presentation/pages/wrappers/wrapper.dart';
+import 'package:appdev/presentation/widgets/dialog/app_quick_alert.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,43 +24,45 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
 
-  Future<void> _login(my_auth.AuthProvider auth) async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await auth.login(
-          email: emailCtrl.text.trim(),
-          password: passwordCtrl.text.trim(),
-        );
-        if (mounted) {
-          DialogHelper.showSuccess(
-            context,
-            "Welcome back!",
-            onOk: () => Get.offAll(() => const Wrapper()),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          DialogHelper.showError(context, e.toString());
-        }
-      }
-    }
-  }
-
-  Future<void> _signInWithGoogle(my_auth.AuthProvider auth) async {
+ Future<void> _login(my_auth.AuthProvider auth) async {
+  if (_formKey.currentState!.validate()) {
     try {
-      await auth.signInWithGoogle();
-      if (mounted) {
-        DialogHelper.showSuccess(
-          context,
-          "Signed in with Google successfully!",
-        );
-      }
+      await auth.login(
+        email: emailCtrl.text.trim(),
+        password: passwordCtrl.text.trim(),
+      );
     } catch (e) {
       if (mounted) {
-        DialogHelper.showError(context, "Google Sign-in failed: $e");
+        AppQuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: "Login Failed",
+          text: e.toString(),
+          confirmBtnText: "OK",
+          confirmBtnColor: const Color(0xFFFF7A30),
+        );
       }
     }
   }
+}
+
+
+  Future<void> _signInWithGoogle(my_auth.AuthProvider auth) async {
+  try {
+    await auth.signInWithGoogle();
+  } catch (e) {
+    if (mounted) {
+      AppQuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Google Sign-in Failed",
+        text: e.toString(),
+        confirmBtnText: "OK",
+        confirmBtnColor: Colors.red,
+      );
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +82,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 5),
                     Image.asset(
                       'assets/main_logo.png',
                       height: 200,
                       color: const Color.fromARGB(255, 113, 52, 2),
                     ),
+                    const SizedBox(height: 16),
                     Text(
                       "Welcome Back",
                       textAlign: TextAlign.center,
@@ -96,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Email
                     CustomTextField(
                       controller: emailCtrl,
                       label: "Email",
@@ -104,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Password
                     CustomTextField(
                       controller: passwordCtrl,
                       label: "Password",
@@ -127,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Login Button
                     AuthButton(
                       label: "Login",
                       isLoading: auth.isLoading,
@@ -134,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Sign up redirect
                     TextButton(
                       onPressed: () => Get.to(() => const SignUpScreen()),
                       style: TextButton.styleFrom(
@@ -146,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const DividerWithText(text: "or sign in with"),
                     const SizedBox(height: 24),
 
+                    // Google Sign In
                     IconButton(
                       icon: Image.asset('assets/search.png', height: 32),
                       onPressed: () => _signInWithGoogle(auth),

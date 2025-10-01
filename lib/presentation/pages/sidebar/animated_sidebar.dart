@@ -68,7 +68,7 @@ class _AnimatedSidebarState extends State<AnimatedSidebar>
           GestureDetector(
             onTap: widget.onClose,
             child: Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               width: double.infinity,
               height: double.infinity,
             ),

@@ -144,7 +144,7 @@ class ProductCard extends StatelessWidget {
     return Container(
       height: 100,
       width: 100,
-      color: Colors.brown.withOpacity(0.1),
+      color: Colors.brown.withValues(alpha: 0.1),
       child: const Icon(Icons.coffee, color: Colors.brown, size: 40),
     );
   }

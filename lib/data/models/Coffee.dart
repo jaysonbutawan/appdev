@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'base_model.dart';
 import 'dart:typed_data';
+import 'product.dart';
 
 class Coffee extends BaseModel {
   final String id;
@@ -19,8 +20,7 @@ class Coffee extends BaseModel {
     required this.price,
   });
 
-  @override
-  Coffee fromJson(Map<String, dynamic> json) {
+  factory Coffee.fromJson(Map<String, dynamic> json) {
     return Coffee(
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
@@ -38,5 +38,23 @@ class Coffee extends BaseModel {
     } catch (e) {
       return null;
     }
+  }
+  
+  @override
+  BaseModel fromJson(Map<String, dynamic> json) {
+    return Coffee.fromJson(json);
+  }
+}
+
+  extension CoffeeMapper on Coffee {
+  Product toProduct() {
+    return Product(
+      id: id,
+      name: name,
+      imageBytes: imageBytes,
+      category: category,
+      price: price,
+      description: description,
+    );
   }
 }

@@ -33,7 +33,7 @@ class _ProductSizeSelectorState extends State<ProductSizeSelector> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedSize = size; // only one can be selected
+                    _selectedSize = size; 
                   });
                 },
                 child: _SizeOption(
@@ -77,10 +77,10 @@ class _SizeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6), // spacing between boxes
+      margin: const EdgeInsets.symmetric(horizontal: 6), 
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: isSelected ? highlightColor.withOpacity(0.1) : Colors.grey[100],
+        color: isSelected ? highlightColor.withValues(alpha: 0.1) : Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isSelected ? highlightColor : Colors.grey[300]!,
