@@ -178,11 +178,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               duration: const Duration(milliseconds: 500),
             );
           },
-          onCancel: () {
-            setState(() {
-              isLogoutClicked = true; // highlight logout row
-            });
-          },
         );
       },
       child: Container(
