@@ -8,6 +8,11 @@ class ProductCard extends StatelessWidget {
   final Uint8List? imageBytes;
   final int quantity;
 
+  // ✅ Add callbacks
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final VoidCallback onRemove;
+
   const ProductCard({
     super.key,
     required this.name,
@@ -15,6 +20,9 @@ class ProductCard extends StatelessWidget {
     this.imageUrl,
     this.imageBytes,
     this.quantity = 1,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onRemove,
   });
 
   @override
@@ -62,7 +70,7 @@ class ProductCard extends StatelessWidget {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {},
+                          onPressed: onDecrement,
                           icon: const Icon(Icons.remove, color: Colors.brown),
                         ),
                         Text(
@@ -74,7 +82,7 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: onIncrement,
                           icon: const Icon(Icons.add, color: Colors.brown),
                         ),
                       ],
@@ -103,12 +111,12 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             right: 0,
             bottom: 0,
             child: IconButton(
-              onPressed: null,
-              icon: Icon(Icons.close, color: Colors.red),
+              onPressed: onRemove,
+              icon: const Icon(Icons.close, color: Colors.red),
               tooltip: "Cancel Order",
             ),
           ),

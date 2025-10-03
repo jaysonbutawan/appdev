@@ -6,7 +6,7 @@ class Cart extends BaseModel {
   final String id;
   final String userId;
   final String coffeeId;
-  final int quantity;
+   int quantity;
   final String? size;
   final String? coffeeName;
   final double? coffeePrice;

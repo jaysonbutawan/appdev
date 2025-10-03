@@ -20,7 +20,6 @@ class CheckoutSection extends StatelessWidget {
         ,
         border: Border(
           top: BorderSide(color: const Color(0xFFFF7A30)),
-          bottom: BorderSide(color: const Color(0xFFFF7A30)),
         ),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -54,7 +53,7 @@ class CheckoutSection extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onCheckout,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF7A30),
+                backgroundColor: const Color.fromARGB(255, 48, 30, 4),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

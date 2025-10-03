@@ -1,11 +1,12 @@
-import 'package:appdev/presentation/pages/screens/checkout_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:appdev/core/themes/app_gradient.dart';
 import 'package:appdev/data/models/cart.dart';
 import 'package:appdev/data/services/cart_service.dart';
 import 'package:appdev/presentation/pages/cards/cart_product_card.dart';
+import 'package:appdev/presentation/pages/screens/checkout_screen.dart';
 import 'package:appdev/presentation/widgets/checkout_section.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:appdev/core/themes/app_gradient.dart';
 
 class AddCartScreen extends StatefulWidget {
   const AddCartScreen({super.key});
@@ -15,6 +16,8 @@ class AddCartScreen extends StatefulWidget {
 }
 
 class _AddCartScreenState extends State<AddCartScreen> {
+  final User? _user = FirebaseAuth.instance.currentUser;
+
   List<Cart> _cartItems = [];
   bool _loading = true;
 
@@ -25,11 +28,10 @@ class _AddCartScreenState extends State<AddCartScreen> {
   }
 
   Future<void> _loadCart() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (_user == null) return;
 
     try {
-      final items = await getUserCart(user.uid);
+      final items = await getUserCart(_user.uid);
       setState(() {
         _cartItems = items;
         _loading = false;
@@ -39,13 +41,81 @@ class _AddCartScreenState extends State<AddCartScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final double totalAmount = _cartItems.fold(
+  double get _totalAmount {
+    return _cartItems.fold(
       0,
       (sum, item) => sum + ((item.coffeePrice ?? 0) * item.quantity),
     );
+  }
 
+  Future<void> _incrementCart(Cart cart) async {
+    if (_user == null) return;
+
+    await incrementCart(_user.uid, cart.coffeeId);
+    setState(() => cart.quantity += 1);
+  }
+
+  Future<void> _decrementCart(Cart cart) async {
+    if (_user == null || cart.quantity <= 1) return;
+
+    await decrementCart(_user.uid, cart.coffeeId);
+    setState(() => cart.quantity -= 1);
+  }
+
+  Future<void> _removeCartItem(Cart cart, int index) async {
+    if (_user == null) return;
+
+    setState(() => _cartItems.removeAt(index));
+    await removeFromCart(_user.uid, cart.coffeeId);
+  }
+
+  Widget _buildEmptyCart() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
+          SizedBox(height: 12),
+          Text(
+            "Your cart is empty",
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartList() {
+    return Expanded(
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _cartItems.length,
+        itemBuilder: (context, index) {
+          final cart = _cartItems[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: ProductCard(
+              name: cart.coffeeName ?? "Unknown Coffee",
+              price: cart.coffeePrice ?? 0,
+              quantity: cart.quantity,
+              imageBytes: cart.imageBytes,
+              imageUrl: null,
+              onIncrement: () => _incrementCart(cart),
+              onDecrement: () => _decrementCart(cart),
+              onRemove: () => _removeCartItem(cart, index),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -67,56 +137,24 @@ class _AddCartScreenState extends State<AddCartScreen> {
                 gradient: AppGradients.mainBackground,
               ),
               child: _cartItems.isEmpty
-                  ?const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.shopping_cart_outlined,
-                              size: 80, color: Colors.grey),
-                          SizedBox(height: 12),
-                          Text(
-                            "Your cart is empty",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _cartItems.length,
-                      itemBuilder: (context, index) {
-                        final cart = _cartItems[index];
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: ProductCard(
-                            name: cart.coffeeName ?? "Unknown Coffee",
-                            price: cart.coffeePrice ?? 0,
-                            quantity: cart.quantity,
-                            imageBytes: cart.imageBytes,
-                            imageUrl: null,
-                          ),
-                        );
-                      },
+                  ? _buildEmptyCart()
+                  : Column(
+                      children: [
+                        _buildCartList(),
+                        CheckoutSection(
+                          totalAmount: _totalAmount,
+                          onCheckout: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CheckoutScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
             ),
-      bottomNavigationBar: totalAmount > 0
-          ? CheckoutSection(
-              totalAmount: totalAmount,
-              onCheckout: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CheckoutScreen(),
-                  ),
-                );
-              },
-            )
-          : null, // ✅ hide CheckoutSection if cart empty
     );
   }
 }
