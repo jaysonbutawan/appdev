@@ -6,13 +6,14 @@ import 'dart:convert';
 
 final cartApi = ApiService<Cart>(
   baseUrl: "${ApiConstants.baseUrl}add_cart_api/index.php",
-  model: Cart(id: '', userId: '', coffeeId: '', quantity: 0),
+  model: Cart(id: '', userId: '', coffeeId: '', quantity: 0,size: ''),
 );
 
 Future<void> addToCart(
   String firebaseUid,
   String coffeeId,
   int quantity,
+  String? size,
 ) async {
   final url = Uri.parse(
     "${ApiConstants.baseUrl}add_cart_api/index.php?action=add",
@@ -25,6 +26,7 @@ Future<void> addToCart(
       "firebase_uid": firebaseUid,
       "coffee_id": coffeeId,
       "quantity": quantity,
+      "size": size,
     }),
   );
 

@@ -16,7 +16,12 @@ class CheckoutSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
-        color:  const Color.fromARGB(255, 48, 30, 4),
+        color: Colors.white
+        ,
+        border: Border(
+          top: BorderSide(color: const Color(0xFFFF7A30)),
+          bottom: BorderSide(color: const Color(0xFFFF7A30)),
+        ),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -29,7 +34,7 @@ class CheckoutSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color:const Color.fromARGB(255, 48, 30, 4),
             ),
           ),
           const SizedBox(height: 8),

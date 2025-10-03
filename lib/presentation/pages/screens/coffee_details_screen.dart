@@ -109,6 +109,7 @@ class ProductDetailScreen extends StatelessWidget {
                       ),
                       minimumSize: const Size(50, 50),
                     ),
+                    
                     child: const Text(
                       'Order Now',
                       style: TextStyle(

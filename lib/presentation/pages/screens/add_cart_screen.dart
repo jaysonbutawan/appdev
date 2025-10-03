@@ -47,15 +47,16 @@ class _AddCartScreenState extends State<AddCartScreen> {
     );
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppGradients.mainBackground,
-          ),
-        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
         title: const Text(
           "Your Cart",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color.fromARGB(255, 48, 30, 4),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -65,48 +66,57 @@ class _AddCartScreenState extends State<AddCartScreen> {
               decoration: const BoxDecoration(
                 gradient: AppGradients.mainBackground,
               ),
-              child: 
-          Column(
-              children: [
-                if (_cartItems.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Text(
-                      "Your cart is empty.",
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _cartItems.length,
-                    itemBuilder: (context, index) {
-                      final cart = _cartItems[index];
+              child: _cartItems.isEmpty
+                  ?const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.shopping_cart_outlined,
+                              size: 80, color: Colors.grey),
+                          SizedBox(height: 12),
+                          Text(
+                            "Your cart is empty",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _cartItems.length,
+                      itemBuilder: (context, index) {
+                        final cart = _cartItems[index];
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: ProductCard(
-                          name: cart.coffeeName ?? "Unknown Coffee",
-                          price: cart.coffeePrice ?? 0,
-                          quantity: cart.quantity,
-                          imageBytes: cart.imageBytes,
-                          imageUrl: null,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                CheckoutSection(
-                  totalAmount: totalAmount,
-                  onCheckout: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const CheckoutScreen()));
-                  },
-                ),
-                const SizedBox(height: 10),
-                ],
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ProductCard(
+                            name: cart.coffeeName ?? "Unknown Coffee",
+                            price: cart.coffeePrice ?? 0,
+                            quantity: cart.quantity,
+                            imageBytes: cart.imageBytes,
+                            imageUrl: null,
+                          ),
+                        );
+                      },
+                    ),
             ),
-          ),
+      bottomNavigationBar: totalAmount > 0
+          ? CheckoutSection(
+              totalAmount: totalAmount,
+              onCheckout: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CheckoutScreen(),
+                  ),
+                );
+              },
+            )
+          : null, // ✅ hide CheckoutSection if cart empty
     );
   }
 }
-

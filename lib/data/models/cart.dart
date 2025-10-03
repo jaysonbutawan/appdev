@@ -7,6 +7,7 @@ class Cart extends BaseModel {
   final String userId;
   final String coffeeId;
   final int quantity;
+  final String? size;
   final String? coffeeName;
   final double? coffeePrice;
   final String coffeeImageBase64;
@@ -16,6 +17,7 @@ class Cart extends BaseModel {
     required this.userId,
     required this.coffeeId,
     required this.quantity,
+    this.size,
     this.coffeeName,
     this.coffeePrice,
     this.coffeeImageBase64 = '',
@@ -27,6 +29,7 @@ class Cart extends BaseModel {
       userId: json['user_id'].toString(),
       coffeeId: json['coffee_id'].toString(),
       quantity: int.parse(json['quantity'].toString()),
+      size: json['size']?.toString(),
       coffeeName: json['name'],
       coffeePrice: double.tryParse(json['price'].toString()),
       coffeeImageBase64: json['image'] ?? '',
@@ -44,6 +47,7 @@ class Cart extends BaseModel {
       "user_id": userId,
       "coffee_id": coffeeId,
       "quantity": quantity,
+      "size": size,
     };
   }
 
