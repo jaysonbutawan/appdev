@@ -21,7 +21,7 @@ class AnimatedSearchBar extends StatefulWidget {
     this.closeOnSuffixTap = false,
     this.prefixIcon = const Icon(Icons.search, color: Color(0xFFFF9A00)),
     this.suffixIcon = const Icon(Icons.clear, color: Color(0xFFFF9A00)),
-    this.animationDurationInMilli = 375,
+    this.animationDurationInMilli = 275,
     this.helpText = "Search...",
     this.onChanged,
   });
@@ -36,61 +36,71 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         AnimatedContainer(
           duration: Duration(milliseconds: widget.animationDurationInMilli),
-          width: _isExpanded ? widget.width : 50,
+          width: _isExpanded
+              ? MediaQuery.of(context).size.width *
+                    0.85// expands responsively
+              : 50, // collapsed size
           height: 50,
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 113, 52, 2), // brown bg
+            color: Colors.white,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFFF9A00), width: 2),
           ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: widget.prefixIcon,
-                onPressed: () {
-                  setState(() {
-                    _isExpanded = !_isExpanded;
-                  });
-                },
-              ),
-              if (_isExpanded)
-                Expanded(
-                  child: TextField(
-                    controller: widget.textController,
-                    autofocus: widget.autoFocus,
-                    style: const TextStyle(
-                      color: Color(0xFFFF9A00) // ✅ text color white
+          child: _isExpanded
+              ? Row(
+                  children: [
+                    IconButton(
+                      icon: widget.prefixIcon,
+                      onPressed: () {
+                        setState(() {
+                          _isExpanded = false;
+                        });
+                      },
                     ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 113, 52, 2),
-                      hintText: widget.helpText,
-                      hintStyle: const TextStyle(
-                        color: Color(0xFFFF9A00), 
+                    Expanded(
+                      child: TextField(
+                        controller: widget.textController,
+                        autofocus: widget.autoFocus,
+                        style: const TextStyle(color: Color(0xFFFF9A00)),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: widget.helpText,
+                          hintStyle: const TextStyle(color: Color(0xFFFF9A00)),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 8,
+                          ),
+                        ),
+                        onChanged: widget.onChanged,
                       ),
-                      border: InputBorder.none,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     ),
-                    onChanged: widget.onChanged,
-                  ),
-                ),
-              if (_isExpanded)
-                IconButton(
-                  icon: widget.suffixIcon,
+                    IconButton(
+                      icon: widget.suffixIcon,
+                      onPressed: () {
+                        if (widget.closeOnSuffixTap) {
+                          setState(() {
+                            _isExpanded = false;
+                          });
+                        }
+                        widget.onSuffixTap();
+                      },
+                    ),
+                  ],
+                )
+              : IconButton(
+                  icon: widget.prefixIcon,
                   onPressed: () {
-                    if (widget.closeOnSuffixTap) {
-                      setState(() {
-                        _isExpanded = false;
-                      });
-                    }
-                    widget.onSuffixTap();
+                    setState(() {
+                      _isExpanded = true;
+                    });
                   },
                 ),
-            ],
-          ),
         ),
       ],
     );

@@ -7,7 +7,7 @@ class CoffeeHouseApi {
   Future<List<CoffeeHouse>> getAllCoffeeHouses() async {
     try {
       final response = await http.get(
-        Uri.parse("${ApiConstants.baseUrl}store_api/index.php?action=all"),
+        Uri.parse("${ApiConstants.baseUrl}store/index.php?action=all"),
       );
 
       if (response.statusCode == 200) {
@@ -25,7 +25,7 @@ class CoffeeHouseApi {
   Future<CoffeeHouse> getCoffeeHouseById(String id) async {
     try {
       final response = await http.get(
-        Uri.parse("${ApiConstants.baseUrl}store_api/index.php?action=single&id=$id"),
+        Uri.parse("${ApiConstants.baseUrl}store/index.php?action=single&id=$id"),
       );
 
       if (response.statusCode == 200) {

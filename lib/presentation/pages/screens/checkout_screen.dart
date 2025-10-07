@@ -5,16 +5,13 @@ import 'package:appdev/data/models/coffeehouse.dart';
 import 'package:appdev/data/services/cart_service.dart';
 import 'package:appdev/presentation/pages/screens/order_screen.dart';
 import 'package:appdev/data/services/coffeehouse_service.dart';
+import 'package:appdev/presentation/pages/screens/coffee_house_selection_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>>? orderItems; // null if from cart
   final bool isFromCart;
 
-  const CheckoutScreen({
-    super.key,
-    this.orderItems,
-    this.isFromCart = true,
-  });
+  const CheckoutScreen({super.key, this.orderItems, this.isFromCart = true});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -23,11 +20,10 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final User? _user = FirebaseAuth.instance.currentUser;
 
-
   bool _isPickup = true;
   bool _loading = true;
   List<Cart> _cartItems = [];
-   CoffeeHouse? _coffeeHouse;
+  CoffeeHouse? _coffeeHouse;
 
   @override
   void initState() {
@@ -40,15 +36,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
- Future<void> _loadCoffeeHouseInfo() async {
+  Future<void> _loadCoffeeHouseInfo() async {
     try {
       final house = await CoffeeHouseApi().getCoffeeHouseById("1");
-
       setState(() {
         _coffeeHouse = house;
       });
     } catch (e) {
       debugPrint("❌ Failed to load coffee house: $e");
+      setState(() {
+        _coffeeHouse = null; // explicitly mark as not found
+      });
     }
   }
 
@@ -109,7 +107,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final items = widget.isFromCart
         ? _cartItems
         : (widget.orderItems ?? [])
-            .map((i) => Cart(
+              .map(
+                (i) => Cart(
                   id: '',
                   userId: _user?.uid ?? '',
                   coffeeId: i['coffeeId'] ?? '',
@@ -117,8 +116,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   coffeePrice: i['price'] ?? 0.0,
                   quantity: i['quantity'] ?? 1,
                   size: i['size'] ?? '',
-                ))
-            .toList();
+                ),
+              )
+              .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -135,29 +135,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : items.isEmpty
-              ? const Center(child: Text("No items in your order"))
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildPickupDeliveryToggle(),
-                      const SizedBox(height: 24),
-                     if (_coffeeHouse != null) // ✅ Wait until loaded
-                        _buildCoffeeHouseInfo(_coffeeHouse!),
-                      const SizedBox(height: 24),
-                      _buildReadyTime(),
-                      const SizedBox(height: 24),
-                      _buildOrderSummary(items),
-                      const SizedBox(height: 24),
-                      _buildAddItemsButton(),
-                      const SizedBox(height: 24),
-                      _buildPriceBreakdown(items),
-                      const SizedBox(height: 32),
-                      _buildConfirmButton(items),
-                    ],
-                  ),
-                ),
+          ? const Center(child: Text("No items in your order"))
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPickupDeliveryToggle(),
+                  const SizedBox(height: 24),
+                  if (_coffeeHouse != null)
+                    _buildCoffeeHouseInfo(_coffeeHouse!),
+                  if (_coffeeHouse == null && !_loading)
+                    const SizedBox(height: 24),
+                  _buildOrderSummary(items),
+                  const SizedBox(height: 24),
+                  _buildPriceBreakdown(items),
+                  const SizedBox(height: 32),
+                  _buildConfirmButton(items),
+                ],
+              ),
+            ),
     );
   }
 
@@ -175,7 +172,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               onTap: () => _togglePickup(true),
               child: Container(
                 decoration: BoxDecoration(
-                  color: _isPickup ? const Color.fromARGB(255, 48, 30, 4) : Colors.transparent,
+                  color: _isPickup
+                      ? const Color.fromARGB(255, 48, 30, 4)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -215,64 +214,93 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
- Widget _buildCoffeeHouseInfo(CoffeeHouse house) {
-  return Container(
-    decoration: BoxDecoration(
-      border: Border.all(color: const Color(0xFFFF7A30)),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(house.name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        const SizedBox(height: 8),
-        Text(house.address,
-            style: const TextStyle(color: Colors.grey, fontSize: 16)),
-        const SizedBox(height: 12),
-        const Align(
-          alignment: Alignment.centerRight,
-          child: Text('Change',
-              style: TextStyle(
+  Widget _buildCoffeeHouseInfo(CoffeeHouse? house) {
+    if (house == null) {
+      // ❌ No coffee house available
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.redAccent),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "⚠️ No available coffee house found",
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ✅ Coffee house info
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFFF7A30)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            house.name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            house.address,
+            style: const TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Prep Time: ${house.prepTime} mins',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color.fromARGB(255, 4, 181, 69),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () async {
+                final selectedHouse = await showCoffeeHouseSelectionDialog(
+                  context,
+                );
+
+                if (selectedHouse != null) {
+                  setState(() {
+                    _coffeeHouse = selectedHouse;
+                  });
+                }
+              },
+              child: const Text(
+                'Change',
+                style: TextStyle(
                   color: Colors.brown,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16)),
-        ),
-      ],
-    ),
-  );
-}
-
-
-  // ⏱ Ready Time
-  Widget _buildReadyTime() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Color(0xFFFF7A30)),
-          bottom: BorderSide(color: Color(0xFFFF7A30)),
-        ),
-      ),
-      child: const Center(
-        child: Text(
-          'Ready in 15-20 mins',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green),
-        ),
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // 🧾 Order Summary
   Widget _buildOrderSummary(List<Cart> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Order Summary',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const Text(
+          'Order Summary',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         const SizedBox(height: 16),
         for (var item in items)
           Padding(
@@ -280,50 +308,47 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("${item.quantity}x",
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(
+                  "${item.quantity}x",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.coffeeName.toString(),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(
+                        item.coffeeName.toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                       if ((item.size ?? '').isNotEmpty)
-                        Text(item.size!,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 14)),
+                        Text(
+                          item.size!,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
                     ],
                   ),
                 ),
-                Text("₱${(item.coffeePrice ?? 0) * item.quantity}",
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  "₱${(item.coffeePrice ?? 0) * item.quantity}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ],
             ),
           ),
       ],
-    );
-  }
-
-  // ➕ Add Items
-  Widget _buildAddItemsButton() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Color(0xFFFF7A30)),
-          bottom: BorderSide(color: Color(0xFFFF7A30)),
-        ),
-      ),
-      child: const Center(
-        child: Text("Add Items",
-            style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown)),
-      ),
     );
   }
 
@@ -344,8 +369,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Color(0xFFFF7A30))),
           ),
-          child: _buildPriceRow("Total", "₱${total.toStringAsFixed(2)}",
-              isTotal: true),
+          child: _buildPriceRow(
+            "Total",
+            "₱${total.toStringAsFixed(2)}",
+            isTotal: true,
+          ),
         ),
       ],
     );
@@ -355,14 +383,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: TextStyle(
-                fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-                fontSize: isTotal ? 18 : 16)),
-        Text(price,
-            style: TextStyle(
-                fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-                fontSize: isTotal ? 18 : 16)),
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 18 : 16,
+          ),
+        ),
+        Text(
+          price,
+          style: TextStyle(
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 18 : 16,
+          ),
+        ),
       ],
     );
   }
@@ -377,8 +411,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           backgroundColor: const Color.fromARGB(255, 48, 30, 4),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: const Text(
           "Confirm Pick-Up",

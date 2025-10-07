@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'package:appdev/core/themes/app_gradient.dart';
 import 'package:appdev/data/models/coffee.dart';
 import 'package:appdev/data/services/coffee_service.dart';
 import 'package:appdev/presentation/pages/cards/coffee_card.dart';
@@ -26,6 +24,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Coffee> _allCoffees = [];
   List<Coffee> _filteredCoffees = [];
 
+  int _selectedCategoryIndex = -1; // -1 means "All"
+  final List<String> _categories = [
+    'All',
+    'Cold Coffee',
+    'Iced Tea',
+    'Pastries',
+    'Hot Coffee',
+    'Smoothies',
+    'Sandwiches',
+    'Desserts',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -40,47 +50,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _allCoffees = coffees;
         _filteredCoffees = coffees;
       });
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   void _filterCoffees(String query) {
     setState(() {
-      _filteredCoffees = query.isEmpty
-          ? _allCoffees
-          : _allCoffees
-              .where((c) => c.name.toLowerCase().contains(query.toLowerCase()))
-              .toList();
+      _filteredCoffees = _allCoffees.where((c) {
+        final matchesSearch =
+            c.name.toLowerCase().contains(query.toLowerCase());
+        final matchesCategory = _selectedCategoryIndex == -1 ||
+            c.category.toLowerCase() ==
+                _categories[_selectedCategoryIndex].toLowerCase();
+        return matchesSearch && matchesCategory;
+      }).toList();
     });
+  }
+
+  void _onCategorySelected(int index) {
+    setState(() {
+      _selectedCategoryIndex = index;
+    });
+    _filterCoffees(_searchController.text); // apply filter with search
   }
 
   void _resetSearch() {
     setState(() {
       _searchController.clear();
-      _filteredCoffees = _allCoffees;
     });
+    _filterCoffees('');
   }
 
-  Widget _buildTopBar() {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Profile Avatar
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ProfileScreen(),
+ Widget _buildTopBar() {
+  return Positioned(
+    top: 0,
+    left: 0,
+    right: 0,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFFF9A00),
+                  width: 2, // ✅ border width
                 ),
               ),
               child: CircleAvatar(
-                radius: 40,
+                radius: MediaQuery.of(context).size.width * 0.09,
                 backgroundColor: Colors.grey.shade200,
                 backgroundImage: _user.photoURL != null
                     ? NetworkImage(_user.photoURL!)
@@ -88,18 +113,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         as ImageProvider,
               ),
             ),
-
-            // Cart Icon
-            IconButton(
-              icon: const Icon(Icons.shopping_cart, color: Color(0xFFFF9A00)),
-              iconSize: 36,
-              onPressed: () => Get.to(() => const AddCartScreen()),
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.shopping_cart, color: Color(0xFFFF9A00)),
+            iconSize: 36,
+            onPressed: () => Get.to(() => const AddCartScreen()),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildSearchBar() {
     return AnimatedSearchBar(
@@ -109,6 +134,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onChanged: _filterCoffees,
     );
   }
+
+  Widget _buildCategorySelector() {
+  return SizedBox(
+    height: 60,
+    child: ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: _categories.length,
+      itemBuilder: (context, index) {
+        final isSelected = _selectedCategoryIndex == index;
+        return Padding(
+          padding: EdgeInsets.only(
+            left: index == 0 ? 16 : 8,
+            right: index == _categories.length - 1 ? 16 : 8,
+            top: 8,
+            bottom: 8,
+          ),
+          child: GestureDetector(
+            onTap: () => _onCategorySelected(index),
+            child: IntrinsicWidth( 
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16, 
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color.fromARGB(255, 113, 52, 2)
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFFFF9A00)
+                        : const Color(0xFFFF9A00),
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Center(
+                  child: Text(
+                    _categories[index],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : const Color.fromARGB(255, 113, 52, 2),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
 
   Widget _buildCoffeeGrid() {
     return FutureBuilder<List<Coffee>>(
@@ -152,7 +235,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Container(
-        decoration: const BoxDecoration(gradient: AppGradients.mainBackground),
+        color: Colors.white,
         child: SafeArea(
           child: Stack(
             children: [
@@ -162,6 +245,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   children: [
                     _buildSearchBar(),
+                    const SizedBox(height: 12),
+                    _buildCategorySelector(), // ✅ Added here
                     const SizedBox(height: 16),
                     Expanded(child: _buildCoffeeGrid()),
                   ],
