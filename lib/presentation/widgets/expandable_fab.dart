@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:appdev/presentation/pages/screens/favorite_screen.dart';
+import 'package:appdev/presentation/pages/screens/order_screen.dart';
 
 class FloatingActionBar extends StatelessWidget {
   final Color? backgroundColor;
@@ -32,7 +33,12 @@ class FloatingActionBar extends StatelessWidget {
           label: 'Order',
           backgroundColor: const Color.fromARGB(255, 160, 68, 14),
           foregroundColor: Colors.white,
-          onTap: () => debugPrint("✉️ Email clicked"),
+          onTap: (){
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OrderScreen()),
+            );
+          },
         ),
 
         SpeedDialChild(

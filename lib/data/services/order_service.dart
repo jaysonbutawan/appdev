@@ -66,7 +66,7 @@ class OrderService {
 
   /// ✅ Get all orders for a user
   static Future<List<dynamic>> getUserOrders(String userId) async {
-    final url = Uri.parse("${ApiConstants.baseUrl}orders/index.php?action=get");
+    final url = Uri.parse("${ApiConstants.baseUrl}order/index.php?action=get");
 
     debugPrint("📤 [OrderService] Fetching orders for user: $userId");
 

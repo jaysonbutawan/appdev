@@ -1,5 +1,8 @@
+import 'package:appdev/presentation/pages/cards/order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:appdev/data/services/order_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -9,7 +12,49 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
- @override
+  late Future<List<dynamic>> _ordersFuture;
+  String _selectedFilter = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    _ordersFuture = user != null
+        ? OrderService.getUserOrders(user.uid)
+        : Future.value([]);
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color.fromARGB(255, 48, 30, 4);
+      case 'cancelled':
+        return const Color.fromARGB(255, 202, 49, 38);
+      case 'ready':
+      case 'ready for pick up':
+        return Colors.green[700]!;
+      case 'pending':
+      case 'preparing':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatItems(dynamic items) {
+    // ✅ Handle both List and String safely
+    if (items == null) return "No items";
+    if (items is String) return items.isEmpty ? "No items" : items;
+    if (items is List && items.isNotEmpty) {
+      return items
+          .map((i) =>
+              "${i['coffee_name'] ?? i['name'] ?? 'Item'} (${i['size'] ?? '—'}) x${i['quantity'] ?? 1}")
+          .join(", ");
+    }
+    return "No items";
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -39,42 +84,66 @@ class _OrderScreenState extends State<OrderScreen> {
               ),
             ),
           ),
-          
-          // Filter Tabs
           _buildFilterTabs(),
-          
-          // Order List
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildOrderCard(
-                  storeName: 'The Coffee House',
-                  orderDate: 'June/25/2003',
-                  totalAmount: '\$12.50',
-                  items: 'Latte, Croissant, and 1 more',
-                  status: 'Ready for Pick Up',
-                  statusColor: Colors.green[700]!,
-                ),
-              const SizedBox(height: 16),
-                _buildOrderCard(
-                  storeName: 'The Coffee House',
-                  orderDate: 'June/25/2003',
-                  totalAmount: '\$8.75',
-                  items: 'Iced Americano, Bagel',
-                  status: 'Completed',
-                  statusColor: const Color.fromARGB(255, 48, 30, 4),
-                ),
-              const SizedBox(height: 16),
-                _buildOrderCard(
-                  storeName: 'Juice Bar',
-                  orderDate: 'June/25/2003',
-                  totalAmount: '\$9.20',
-                  items: 'Green Smoothie',
-                  status: 'Cancelled',
-                  statusColor: const Color.fromARGB(255, 202, 49, 38),
-                ),
-              ],
+            child: FutureBuilder<List<dynamic>>(
+              future: _ordersFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error: ${snapshot.error}",
+                      style: GoogleFonts.inter(color: Colors.red),
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No orders found."));
+                }
+
+                final allOrders = snapshot.data!;
+                final filteredOrders = _selectedFilter == "All"
+                    ? allOrders
+                    : allOrders.where((order) {
+                        final status = order["status"]?.toLowerCase() ?? "";
+                        if (_selectedFilter == "Active") {
+                          return [
+                            "pending",
+                            "accepted",
+                            "preparing",
+                            "ready"
+                          ].contains(status);
+                        } else if (_selectedFilter == "Past") {
+                          return ["completed", "cancelled"].contains(status);
+                        }
+                        return true;
+                      }).toList();
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filteredOrders.length,
+                  itemBuilder: (context, index) {
+                    final order = filteredOrders[index];
+                    final items = order["items"];
+
+                    return OrderCard(
+                      storeName: order["store_name"] ?? "Unknown Store",
+                      orderDate: order["created_at"] ?? "",
+                      totalAmount: "${order["total_amount"] ?? 0}",
+                      items: _formatItems(items),
+                      status: order["status"] ?? "Unknown",
+                      statusColor:
+                          _getStatusColor(order["status"] ?? "Unknown"),
+                      onReorder: () => _handleReorder(order),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -83,168 +152,47 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   Widget _buildFilterTabs() {
+    final filters = ["All", "Active", "Past"];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 48, 30, 4),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Center(
-                child: Text(
-                  'All',
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+        children: filters.map((filter) {
+          final bool isSelected = _selectedFilter == filter;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedFilter = filter),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color.fromARGB(255, 48, 30, 4)
+                      : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                child: Center(
+                  child: Text(
+                    filter,
+                    style: GoogleFonts.inter(
+                      color: isSelected ? Colors.white : Colors.grey[600],
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding:const EdgeInsets.symmetric(vertical: 8),
-              child: Center(
-                child: Text(
-                  'Active',
-                  style: GoogleFonts.inter(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Center(
-                child: Text(
-                  'Past',
-                  style: GoogleFonts.inter(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildOrderCard({
-    required String storeName,
-    required String orderDate,
-    required String totalAmount,
-    required String items,
-    required String status,
-    required Color statusColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromARGB(255, 48, 30, 4)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  storeName,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-               const  SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      orderDate,
-                      style: GoogleFonts.inter(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
-                    Text(
-                      totalAmount,
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-               const  SizedBox(height: 8),
-                Text(
-                  items,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    status,
-                    style: GoogleFonts.inter(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            height: 1,
-            color: Colors.grey[300],
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: Text(
-                'Reorder',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: const Color(0xFFFF7A30),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+  void _handleReorder(Map<String, dynamic> order) {
+    debugPrint("🛒 Reorder tapped for order: ${order['order_id']}");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Reorder feature coming soon!")),
     );
   }
 }
