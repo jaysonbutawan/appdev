@@ -5,6 +5,9 @@ import 'package:appdev/data/models/coffeehouse.dart';
 import 'package:appdev/data/services/cart_service.dart';
 import 'package:appdev/presentation/pages/screens/order_screen.dart';
 import 'package:appdev/data/services/coffeehouse_service.dart';
+import 'package:appdev/data/services/order_service.dart';
+import 'package:appdev/presentation/pages/screens/payment_input_dialog.dart';
+
 import 'package:appdev/presentation/pages/screens/coffee_house_selection_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -73,29 +76,46 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // 🧾 Confirm Order (clear cart or handle direct order)
-  Future<void> _confirmOrder(List<Cart> items) async {
-    if (_user == null) return;
-    try {
-      debugPrint("✅ Confirming order for user: ${_user.uid}");
-      debugPrint("🛒 Total Items: ${items.length}");
+// 🧾 Confirm Order (clear cart or handle direct order)
+Future<void> _confirmOrder(List<Cart> items, double payment) async {
+  if (_user == null) return;
 
-      if (widget.isFromCart) {
-        for (var cart in items) {
-          await removeFromCart(_user.uid, cart.coffeeId);
-        }
-      }
+  try {
+    debugPrint("✅ Confirming order for user: ${_user.uid}");
+    debugPrint("🛒 Total Items: ${items.length}");
 
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const OrderScreen()),
-        );
+    // ✅ Save the order in the database
+    await OrderService.saveOrder(
+      userId: _user.uid,
+      coffeeHouse: _coffeeHouse,
+      items: items,
+      paymentAmount: payment,
+      isPickup: _isPickup,
+    );
+
+    // ✅ If order came from cart, clear it
+    if (widget.isFromCart) {
+      for (var cart in items) {
+        await removeFromCart(_user.uid, cart.coffeeId);
       }
-    } catch (e) {
-      debugPrint("❌ Order failed: $e");
     }
+
+    debugPrint("🎉 Order successfully saved!");
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const OrderScreen()),
+      );
+    }
+  } catch (e) {
+    debugPrint("❌ Order failed: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Order failed: $e")),
+    );
   }
+}
+
 
   // 🧱 Toggle between Pickup & Delivery
   void _togglePickup(bool value) {
@@ -401,25 +421,51 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // 🟤 Confirm Button
-  Widget _buildConfirmButton(List<Cart> items) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _confirmOrder(items),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 48, 30, 4),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: const Text(
-          "Confirm Pick-Up",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+Widget _buildConfirmButton(List<Cart> items) {
+  final totalAmount = _calculateTotal(items);
+
+  return SizedBox(
+    width: double.infinity,
+    child: ElevatedButton(
+      onPressed: () async {
+        final payment = await showPaymentInputDialog(context, totalAmount);
+
+        if (payment == null) {
+          debugPrint("⚠️ Payment cancelled");
+          return;
+        }
+
+        if (payment < totalAmount) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Insufficient payment! You need ₱${(totalAmount - payment).toStringAsFixed(2)} more.",
+              ),
+            ),
+          );
+          return;
+        }
+
+        // ✅ Proceed with saving order to DB
+        debugPrint("✅ Payment accepted: ₱$payment");
+        await _confirmOrder(items, payment);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 48, 30, 4),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
-    );
-  }
+      child: const Text(
+        "Confirm Pick-Up",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+    ),
+  );
+}
+
+
+
 }

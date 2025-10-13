@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:appdev/data/services/category_service.dart';
 import 'package:appdev/data/models/coffee.dart';
 import 'package:appdev/data/services/coffee_service.dart';
 import 'package:appdev/presentation/pages/cards/coffee_card.dart';
@@ -21,46 +22,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   late Future<List<Coffee>> _coffeeFuture;
+late Future<List<String>> _categoryFuture;
+
   List<Coffee> _allCoffees = [];
   List<Coffee> _filteredCoffees = [];
+  List<String> _categories = ["All"]; // Default while loading
 
-  int _selectedCategoryIndex = -1; // -1 means "All"
-  final List<String> _categories = [
-    'All',
-    'Cold Coffee',
-    'Iced Tea',
-    'Pastries',
-    'Hot Coffee',
-    'Smoothies',
-    'Sandwiches',
-    'Desserts',
-  ];
+  int _selectedCategoryIndex = 0; // Default = "All"
 
-  @override
+@override
   void initState() {
     super.initState();
     _coffeeFuture = CoffeeApi().getAllCoffees();
-    _initializeCoffeeData();
+    _categoryFuture = CategoryService().getAllCategories();
+    _initializeData();
   }
 
-  Future<void> _initializeCoffeeData() async {
+  Future<void> _initializeData() async {
     try {
       final coffees = await _coffeeFuture;
+      final categories = await _categoryFuture;
+
       setState(() {
         _allCoffees = coffees;
         _filteredCoffees = coffees;
+        _categories = categories;
       });
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("Error initializing data: $e");
+    }
   }
 
   void _filterCoffees(String query) {
     setState(() {
+      final selectedCategory = _categories[_selectedCategoryIndex];
       _filteredCoffees = _allCoffees.where((c) {
-        final matchesSearch =
-            c.name.toLowerCase().contains(query.toLowerCase());
-        final matchesCategory = _selectedCategoryIndex == -1 ||
-            c.category.toLowerCase() ==
-                _categories[_selectedCategoryIndex].toLowerCase();
+        final matchesSearch = c.name.toLowerCase().contains(query.toLowerCase());
+        final matchesCategory = selectedCategory == "All" ||
+            c.category.toLowerCase() == selectedCategory.toLowerCase();
         return matchesSearch && matchesCategory;
       }).toList();
     });
@@ -70,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedCategoryIndex = index;
     });
-    _filterCoffees(_searchController.text); // apply filter with search
+    _filterCoffees(_searchController.text);
   }
 
   void _resetSearch() {
