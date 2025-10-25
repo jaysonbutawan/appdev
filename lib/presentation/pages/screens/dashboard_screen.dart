@@ -201,7 +201,7 @@ late Future<List<String>> _categoryFuture;
         } else if (snapshot.hasError) {
           return Center(child: Text("Error: ${snapshot.error}"));
         } else if (_filteredCoffees.isEmpty) {
-          return const Center(child: Text("No coffees found"));
+          return const Center(child: Text("No coffees Available"));
         }
 
         return GridView.builder(
