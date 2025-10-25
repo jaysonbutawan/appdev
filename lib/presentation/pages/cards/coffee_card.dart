@@ -23,6 +23,11 @@ class CoffeeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      if (imageBytes != null) {
+    print('CoffeeCard: imageBytes is available, length = ${imageBytes!.length}');
+  } else {
+    print('CoffeeCard: imageBytes is null');
+  }
     return GestureDetector(
       onTap: () {
      Navigator.push(
