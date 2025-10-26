@@ -466,7 +466,4 @@ Widget _buildConfirmButton(List<Cart> items) {
     ),
   );
 }
-
-
-
 }
