@@ -5,8 +5,9 @@ import 'package:appdev/presentation/widgets/product/product_header.dart';
 import 'package:appdev/presentation/widgets/product/product_image.dart';
 import 'package:appdev/presentation/widgets/product/product_size_selector.dart';
 import 'package:appdev/utils/cart_helper.dart';
+import 'package:appdev/presentation/pages/screens/checkout_screen.dart'; // 👈 import checkout
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends StatefulWidget {
   final Product product;
 
   const ProductDetailScreen({
@@ -15,7 +16,22 @@ class ProductDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  String? _selectedSize; // 🧩 store selected size
+
+  void _onSizeSelected(String size) {
+    setState(() {
+      _selectedSize = size;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -31,17 +47,17 @@ class ProductDetailScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 ProductImage(imageBytes: product.imageBytes),
                 const SizedBox(height: 20),
-                _buildProductInfo(),
+                _buildProductInfo(product),
                 const SizedBox(height: 20),
-                _buildPriceSection(),
+                _buildPriceSection(product),
                 const SizedBox(height: 20),
-                _buildAddToCartButton(context),
+                _buildAddToCartButton(context, product),
                 const SizedBox(height: 20),
                 const Divider(height: 1, color: Colors.grey),
                 const SizedBox(height: 20),
-                const ProductSizeSelector(),
+                ProductSizeSelector(onSizeSelected: _onSizeSelected), 
                 const SizedBox(height: 20),
-                _buildOrderNowButton(context),
+                _buildOrderNowButton(context, product),
               ],
             ),
           ),
@@ -50,7 +66,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductInfo() {
+  Widget _buildProductInfo(Product product) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -73,13 +89,13 @@ class ProductDetailScreen extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           product.description,
-          style: const TextStyle(fontSize: 14, height: 1.5),
+          style: const TextStyle(fontSize: 14, height: 1.5, color: Colors.white),
         ),
       ],
     );
   }
 
-  Widget _buildPriceSection() {
+  Widget _buildPriceSection(Product product) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,12 +113,19 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAddToCartButton(BuildContext context) {
+  Widget _buildAddToCartButton(BuildContext context, Product product) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          handleAddToCart(context, product.id, product.name);
+          if (_selectedSize == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Please select a size first.")),
+            );
+            return;
+          }
+
+          handleAddToCart(context, product.id, product.name, size: _selectedSize);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFFF7A30),
@@ -123,13 +146,34 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderNowButton(BuildContext context) {
+  Widget _buildOrderNowButton(BuildContext context, Product product) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("${product.name} ordered!")),
+          if (_selectedSize == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Please select a size first.")),
+            );
+            return;
+          }
+
+          final orderItem = {
+            "coffeeId": product.id,
+            "name": product.name,
+            "price": double.tryParse(product.price) ?? 0.0,
+            "quantity": 1,
+            "size": _selectedSize,
+          };
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CheckoutScreen(
+                orderItems: [orderItem],
+                isFromCart: false,
+              ),
+            ),
           );
         },
         style: ElevatedButton.styleFrom(

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ProductSizeSelector extends StatefulWidget {
-  const ProductSizeSelector({super.key});
+   final ValueChanged<String>? onSizeSelected; //
+  const ProductSizeSelector({super.key, this.onSizeSelected});
 
   @override
   State<ProductSizeSelector> createState() => _ProductSizeSelectorState();
@@ -32,10 +33,11 @@ class _ProductSizeSelectorState extends State<ProductSizeSelector> {
             return Expanded(
               child: GestureDetector(
                 onTap: () {
-                  setState(() {
-                    _selectedSize = size; 
-                  });
-                },
+                    setState(() {
+                      _selectedSize = size;
+                    });
+                    widget.onSizeSelected?.call(size); 
+                  },
                 child: _SizeOption(
                   label: size,
                   isSelected: isSelected,

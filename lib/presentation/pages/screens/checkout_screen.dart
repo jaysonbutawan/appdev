@@ -36,6 +36,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _loadCoffeeHouseInfo();
     } else {
       _loading = false;
+        _loadCoffeeHouseInfo();
     }
   }
 

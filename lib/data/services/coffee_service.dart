@@ -59,6 +59,28 @@ class CoffeeApi {
     return false;
   }
 
+  Future<List<Coffee>> getFavoriteCoffees(String userId) async {
+  final response = await http.get(
+    Uri.parse(
+      "${ApiConstants.baseUrl}coffee_api/index.php?action=getFavorites&firebase_uid=$userId",
+    ),
+  );
+
+  print("Favorites Response: ${response.statusCode}");
+  print("Favorites Body: ${response.body}");
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true && data["data"] != null) {
+      final List list = data["data"];
+      return list.map((json) => Coffee.fromJson(json)).toList();
+    }
+  }
+  return [];
+}
+
+
   Future<List<Coffee>> searchCoffees(String query) async {
     final response = await http.get(
       Uri.parse(
