@@ -95,6 +95,38 @@ class OrderService {
       return [];
     }
   }
+  /// ✅ Cancel an order
+static Future<bool> cancelOrder(String orderId) async {
+  final url = Uri.parse("${ApiConstants.baseUrl}order/index.php?action=cancel");
+
+  debugPrint("📤 [OrderService] Cancelling order ID: $orderId");
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"order_id": orderId}),
+    );
+
+    debugPrint("📦 [OrderService] Cancel Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data["success"] == true) {
+        debugPrint("✅ [OrderService] Order cancelled successfully");
+        return true;
+      } else {
+        debugPrint("⚠️ [OrderService] Failed: ${data['message']}");
+        return false;
+      }
+    } else {
+      throw Exception("❌ Failed to cancel order. HTTP ${response.statusCode}");
+    }
+  } catch (e) {
+    debugPrint("🔥 [OrderService] Exception while cancelling order: $e");
+    return false;
+  }
+}
 
   /// ✅ Calculate total price
   static double _calculateTotal(List<Cart> items) {

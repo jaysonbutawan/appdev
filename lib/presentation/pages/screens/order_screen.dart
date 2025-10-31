@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:appdev/data/services/order_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -139,7 +140,7 @@ class _OrderScreenState extends State<OrderScreen> {
                       status: order["status"] ?? "Unknown",
                       statusColor:
                           _getStatusColor(order["status"] ?? "Unknown"),
-                      onReorder: () => _handleReorder(order),
+                      onReorder: () => cancelOrder(order),
                     );
                   },
                 );
@@ -189,10 +190,85 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  void _handleReorder(Map<String, dynamic> order) {
-    debugPrint("🛒 Reorder tapped for order: ${order['order_id']}");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Reorder feature coming soon!")),
-    );
+void cancelOrder(Map<String, dynamic> order) async {
+  final orderId = order['order_id']?.toString() ?? '';
+
+  if (orderId.isEmpty) {
+    Flushbar(
+      message: "Invalid order ID.",
+      duration: const Duration(seconds: 3),
+      flushbarPosition: FlushbarPosition.TOP,
+      backgroundColor: Colors.redAccent,
+    ).show(context);
+    return;
   }
+
+  final status = order['status']?.toString().toLowerCase() ?? '';
+  if (status == 'cancelled' || status == 'completed') {
+    Flushbar(
+      message: "Order is already $status).",
+      duration: const Duration(seconds: 3),
+      flushbarPosition: FlushbarPosition.TOP,
+      backgroundColor:  const Color(0xFFFF9A00),
+    ).show(context);
+    return;
+  }
+
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Cancel Order"),
+      content: const Text("Are you sure you want to cancel this order? This action cannot be undone."),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text("No"),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text("Yes, Cancel"),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm != true) return;
+
+  Flushbar(
+    message: "Cancelling order...",
+    duration: const Duration(seconds: 2),
+    flushbarPosition: FlushbarPosition.TOP,
+    backgroundColor: Colors.blueAccent,
+  ).show(context);
+
+  final success = await OrderService.cancelOrder(orderId);
+
+  if (success) {
+    Flushbar(
+      message: "Order cancelled successfully.",
+      duration: const Duration(seconds: 3),
+      flushbarPosition: FlushbarPosition.TOP,
+      backgroundColor: const Color.fromARGB(255, 113, 52, 2),
+    ).show(context);
+    await _loadOrders();
+  } else {
+    Flushbar(
+      message: "Failed to cancel order.",
+      duration: const Duration(seconds: 3),
+      flushbarPosition: FlushbarPosition.TOP,
+      backgroundColor: const Color(0xFFFF9A00),
+    ).show(context);
+  }
+}
+
+Future<void> _loadOrders() async {
+  final user = FirebaseAuth.instance.currentUser;
+  setState(() {
+    _ordersFuture = user != null
+        ? OrderService.getUserOrders(user.uid)
+        : Future.value([]);
+  });
+}
+
+
 }
