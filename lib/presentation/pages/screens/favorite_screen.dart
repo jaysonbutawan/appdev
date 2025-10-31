@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:appdev/core/themes/app_gradient.dart';
 import 'package:appdev/data/models/coffee.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -45,33 +44,29 @@ final String _userId = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppGradients.mainBackground,
-          ),
+          color: Colors.white,
         ),
         title: const Text(
-          "Your Favorite Coffees ☕",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          "Your Favorite Coffees",
+          style: TextStyle(color: Colors.brown, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Container(
-              decoration: const BoxDecoration(
-                gradient: AppGradients.mainBackground,
-              ),
+              color: Colors.white,
               child: _favoriteCoffees.isEmpty
                   ? const Center(
                       child: Text(
-                        "You have no favorite coffees yet ☹️",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        "You have no favorite coffees yet ",
+                        style: TextStyle(color: Colors.brown, fontSize: 16),
                       ),
                     )
                   : RefreshIndicator(
     onRefresh: _loadFavorites,
     color: Colors.white,
-    backgroundColor: const Color(0xFF6F4E37), // optional: brown tone
+    backgroundColor: Colors.white,
     child: GridView.builder(
       padding: const EdgeInsets.all(12),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -84,7 +79,6 @@ final String _userId = FirebaseAuth.instance.currentUser!.uid;
       itemBuilder: (context, index) {
         final coffee = _favoriteCoffees[index];
 
-        // Decode base64 image safely
         Uint8List? imageBytes;
         if (coffee.imageBase64.isNotEmpty) {
           try {

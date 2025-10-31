@@ -179,7 +179,6 @@ Future<void> _confirmOrder(List<Cart> items, double payment) async {
     );
   }
 
-  // 🔘 PICKUP / DELIVERY Toggle
   Widget _buildPickupDeliveryToggle() {
     return Container(
       decoration: BoxDecoration(
@@ -237,7 +236,6 @@ Future<void> _confirmOrder(List<Cart> items, double payment) async {
 
   Widget _buildCoffeeHouseInfo(CoffeeHouse? house) {
     if (house == null) {
-      // ❌ No coffee house available
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
@@ -247,7 +245,7 @@ Future<void> _confirmOrder(List<Cart> items, double payment) async {
         ),
         child: const Center(
           child: Text(
-            "⚠️ No available coffee house found",
+            "No available coffee house found",
             style: TextStyle(
               color: Colors.redAccent,
               fontWeight: FontWeight.bold,
@@ -258,7 +256,6 @@ Future<void> _confirmOrder(List<Cart> items, double payment) async {
       );
     }
 
-    // ✅ Coffee house info
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFFF7A30)),
@@ -373,10 +370,9 @@ Future<void> _confirmOrder(List<Cart> items, double payment) async {
     );
   }
 
-  // 💵 Price Breakdown
   Widget _buildPriceBreakdown(List<Cart> items) {
     final subtotal = _calculateTotal(items);
-    const taxes = 0.20; // fixed example
+    const taxes = 0; 
 
     final total = subtotal + taxes;
 
@@ -432,7 +428,7 @@ Widget _buildConfirmButton(List<Cart> items) {
         final payment = await showPaymentInputDialog(context, totalAmount);
 
         if (payment == null) {
-          debugPrint("⚠️ Payment cancelled");
+          debugPrint(" Payment cancelled");
           return;
         }
 
@@ -447,8 +443,7 @@ Widget _buildConfirmButton(List<Cart> items) {
           return;
         }
 
-        // ✅ Proceed with saving order to DB
-        debugPrint("✅ Payment accepted: ₱$payment");
+        debugPrint("Payment accepted: ₱$payment");
         await _confirmOrder(items, payment);
       },
       style: ElevatedButton.styleFrom(

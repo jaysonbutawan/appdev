@@ -53,14 +53,7 @@ class FloatingActionBar extends StatelessWidget {
             );
           },
         ),
-
-        SpeedDialChild(
-          child: const Icon(Icons.notifications),
-          label: 'Notify',
-          backgroundColor: const Color.fromARGB(255, 24, 113, 8),
-          foregroundColor: Colors.white,
-          onTap: () => debugPrint("➕ Add clicked"),
-        ),
+        
       ],
 
       child: FittedBox(
