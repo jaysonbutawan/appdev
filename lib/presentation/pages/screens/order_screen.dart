@@ -218,7 +218,7 @@ void cancelOrder(Map<String, dynamic> order) async {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text("Cancel Order"),
-      content: const Text("Are you sure you want to cancel this order? This action cannot be undone."),
+      content: const Text("You want to cancel this order? This action cannot be undone and no refund."),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
