@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -30,21 +32,28 @@ class AuthProvider extends ChangeNotifier {
 }
 
 
-  Future<void> signInWithGoogle() async {
-    _setLoading(true);
-    try {
-      final credential = await _authService.signInWithGoogle();
-      if (credential?.user != null) {
-        await _authService.saveUserToDatabase(credential!.user!);
-        Get.offAll(() => const Wrapper());
-        notifyListeners(); 
-      }
-    } catch (e) {
-      throw Exception("Google sign-in failed: $e");
-    } finally {
-      _setLoading(false);
+   Future<void> signInWithGoogle() async {
+  _setLoading(true);
+  try {
+    final credential = await _authService
+        .signInWithGoogle()
+        .timeout(const Duration(seconds: 15));
+
+    if (credential?.user != null) {
+      await _authService.saveUserToDatabase(credential!.user!);
+      Get.offAll(() => const Wrapper());
+    } else {
+      throw Exception("Google sign-in cancelled by user.");
     }
+  } on TimeoutException {
+    throw Exception("Google sign-in timed out. Check your internet connection.");
+  } catch (e) {
+    throw Exception("Google sign-in failed: $e");
+  } finally {
+    _setLoading(false); 
   }
+}
+
 
   Future<void> logout() async {
     await _authService.signOut();
@@ -54,6 +63,15 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> reset(String email) async {
     await _authService.auth.sendPasswordResetEmail(email: email.trim());
+  }
+
+  Future<bool> updateUserName(String newName) async {
+    final success = await _authService.updateUserName(newName);
+    return success;
+  }
+  
+    User? getCurrentUser() {
+    return _authService.auth.currentUser;
   }
 
   void _setLoading(bool value) {

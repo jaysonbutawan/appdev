@@ -1,4 +1,3 @@
-// lib/data/services/auth_service.dart
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -37,6 +36,7 @@ class AuthService {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+  
 
   Future<void> saveUserToDatabase(User user) async {
     try {
@@ -52,11 +52,47 @@ class AuthService {
       );
 
       final data = jsonDecode(response.body);
-      debugPrint("✅ SaveUser API Response: $data");
+      debugPrint("SaveUser API Response: $data");
     } catch (e) {
-      debugPrint("❌ Error saving user: $e");
+      debugPrint("Error saving user: $e");
     }
   }
+
+  Future<bool> updateUserName(String newName) async {
+    try {
+      final User? user = _auth.currentUser;
+      if (user == null) {
+        debugPrint("No user is currently signed in.");
+        return false;
+      }
+
+      await user.updateDisplayName(newName);
+      await user.reload(); 
+
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}user_api/index.php?action=update_name"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "firebase_uid": user.uid,
+          "name": newName,
+        }),
+      );
+
+      debugPrint(" Update name API Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        debugPrint(" Name updated successfully on backend.");
+        return true;
+      } else {
+        debugPrint("Backend failed to update name: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Error updating user name: $e");
+      return false;
+    }
+  }
+
 
   FirebaseAuth get auth => _auth;
 }

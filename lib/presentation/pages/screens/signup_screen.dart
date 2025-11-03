@@ -24,36 +24,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final confirmPasswordCtrl = TextEditingController();
 
   Future<void> _signUp() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (passwordCtrl.text != confirmPasswordCtrl.text) {
-      _showSnackBar("Passwords do not match", Colors.red);
-      return;
-    }
-
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailCtrl.text.trim(),
-        password: passwordCtrl.text.trim(),
-      );
-
-      if (!mounted) return;
-      _showSnackBar("Account created successfully!", Colors.green);
-      Get.offAll(() => const LoginScreen());
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(
-        e.message ?? "An error occurred during sign up",
-        Colors.red,
-      );
-    }
+  if (!_formKey.currentState!.validate()) {
+    _showAlertDialog("Validation Error", "Please fill in all required fields.");
+    return;
   }
 
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
+  if (passwordCtrl.text != confirmPasswordCtrl.text) {
+    _showAlertDialog("Password Mismatch", "Passwords do not match.");
+    return;
+  }
+
+  try {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: emailCtrl.text.trim(),
+      password: passwordCtrl.text.trim(),
     );
+
+    if (!mounted) return;
+    _showAlertDialog("Success", "Account created successfully!", onOk: () {
+      Get.offAll(() => const LoginScreen());
+    });
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+    _showAlertDialog("Sign Up Error", e.message ?? "An error occurred during sign up.");
   }
+}
+
+void _showAlertDialog(String title, String message, {VoidCallback? onOk}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (onOk != null) onOk();
+            },
+            child: const Text("OK", style: TextStyle(color: Colors.brown)),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Widget _buildHeader(BuildContext context) {
     return Column(

@@ -99,17 +99,16 @@ class CoffeeApi {
 
   Future<bool> createOrder({
     required String userId,
-    List<Cart>? cartItems, // case: checkout
-    Coffee? directCoffee, // case: buy now
+    List<Cart>? cartItems, 
+    Coffee? directCoffee,
     int directQuantity = 1,
     String size = "medium",
   }) async {
     try {
-      // 🔹 Build items depending on flow
       final List<Map<String, dynamic>> items = [];
 
       if (cartItems != null && cartItems.isNotEmpty) {
-        // 🛒 From Cart checkout
+        // From Cart checkout
         items.addAll(
           cartItems.map(
             (cart) => {
@@ -121,18 +120,17 @@ class CoffeeApi {
           ),
         );
       } else if (directCoffee != null) {
-        // ⚡ Direct "Buy Now"
+        //Direct "Buy Now"
         items.add({
           "coffee_id": directCoffee.id,
           "quantity": directQuantity,
           "size": size,
-          "price": directCoffee.price, // from Coffee model
+          "price": directCoffee.price,
         });
       } else {
         throw Exception("No items provided for order");
       }
 
-      // 🔹 Prepare request body
       final body = {"user_id": userId, "items": items};
 
       final response = await http.post(

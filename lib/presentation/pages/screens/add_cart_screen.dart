@@ -7,6 +7,7 @@ import 'package:appdev/data/services/cart_service.dart';
 import 'package:appdev/presentation/pages/cards/cart_product_card.dart';
 import 'package:appdev/presentation/pages/screens/checkout_screen.dart';
 import 'package:appdev/presentation/widgets/checkout_section.dart';
+import 'package:appdev/presentation/pages/screens/user_profile_screen.dart';
 
 class AddCartScreen extends StatefulWidget {
   const AddCartScreen({super.key});
@@ -141,17 +142,55 @@ class _AddCartScreenState extends State<AddCartScreen> {
                   : Column(
                       children: [
                         _buildCartList(),
-                        CheckoutSection(
-                          totalAmount: _totalAmount,
-                          onCheckout: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CheckoutScreen(),
-                              ),
-                            );
-                          },
-                        ),
+ CheckoutSection(
+  totalAmount: _totalAmount,
+  onCheckout: () {
+    final user = FirebaseAuth.instance.currentUser;
+    final displayName = user?.displayName ?? "No Name";
+
+    // Validation: ignore case and spaces
+    if (displayName.trim().isEmpty || displayName.trim().toLowerCase() == "no name") {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Incomplete Profile"),
+            content: const Text(
+              "Please provide your full name first before proceeding to checkout.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+
+                  // Navigate to profile screen so they can edit name
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
+                  );
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+      return; // Stop checkout navigation
+    }
+
+    // ✅ Proceed to checkout if name is valid
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CheckoutScreen(),
+      ),
+    );
+  },
+),
+
+
                       ],
                     ),
             ),

@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
@@ -30,9 +31,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _isLoading = false;
         });
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password reset link sent to your email")),
-        );
+       Flushbar(
+            message: "Please select a size first.",
+            duration: const Duration(seconds: 2),
+            flushbarPosition: FlushbarPosition.TOP,
+            backgroundColor: const Color.fromARGB(200, 76, 44, 6),
+            icon: const Icon(Icons.error, color: Colors.white),
+          ).show(context);
+          return;
       } on FirebaseAuthException catch (e) {
         setState(() => _isLoading = false);
 

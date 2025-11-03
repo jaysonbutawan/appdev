@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appdev/data/services/coffee_service.dart';
@@ -34,25 +35,34 @@ class _ProductHeaderState extends State<ProductHeader> {
     });
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
-    );
-  }
-
   Future<void> toggleFavorite() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
+  try {
+    bool currentlyFavorite = await coffeeApi.checkIfFavorite(widget.coffeeId, user.uid);
     final success = await coffeeApi.addFavouriteCoffee(widget.coffeeId, user.uid);
-
     if (success) {
-      setState(() => isFavorite = !isFavorite);
-      _showMessage(isFavorite ? "Added to favorites ❤️" : "Removed from favorites ❌");
-    } else {
-      _showMessage("Something went wrong, please try again.");
+      setState(() => isFavorite = !currentlyFavorite);
+      showFlushbar(
+        isFavorite ? "Added to your favorites." : "Removed from your favorites.",
+      );
     }
+  } catch (e) {
+    print("Error toggling favorite: $e");
   }
+}
+
+void showFlushbar(String message) {
+  Flushbar(
+    message: message,
+    duration: const Duration(seconds: 2),
+    flushbarPosition: FlushbarPosition.TOP,
+    backgroundColor: const Color.fromARGB(200, 76, 44, 6),
+    icon: const Icon(Icons.favorite, color: Colors.white),
+  ).show(context);
+}
+
 
   @override
   Widget build(BuildContext context) {

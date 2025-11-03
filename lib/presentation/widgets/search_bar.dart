@@ -31,7 +31,7 @@ class AnimatedSearchBar extends StatefulWidget {
 }
 
 class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +42,8 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
           duration: Duration(milliseconds: widget.animationDurationInMilli),
           width: _isExpanded
               ? MediaQuery.of(context).size.width *
-                    0.85// expands responsively
-              : 50, // collapsed size
+                    0.85
+              : 50,
           height: 50,
           decoration: BoxDecoration(
             color: Colors.white,

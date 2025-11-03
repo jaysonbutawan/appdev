@@ -22,15 +22,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   late Future<List<Coffee>> _coffeeFuture;
-late Future<List<String>> _categoryFuture;
+  late Future<List<String>> _categoryFuture;
 
   List<Coffee> _allCoffees = [];
   List<Coffee> _filteredCoffees = [];
-  List<String> _categories = ["All"]; // Default while loading
+  List<String> _categories = ["All"];
 
-  int _selectedCategoryIndex = 0; // Default = "All"
+  int _selectedCategoryIndex = 0;
 
-@override
+  @override
   void initState() {
     super.initState();
     _coffeeFuture = CoffeeApi().getAllCoffees();
@@ -57,8 +57,11 @@ late Future<List<String>> _categoryFuture;
     setState(() {
       final selectedCategory = _categories[_selectedCategoryIndex];
       _filteredCoffees = _allCoffees.where((c) {
-        final matchesSearch = c.name.toLowerCase().contains(query.toLowerCase());
-        final matchesCategory = selectedCategory == "All" ||
+        final matchesSearch = c.name.toLowerCase().contains(
+          query.toLowerCase(),
+        );
+        final matchesCategory =
+            selectedCategory == "All" ||
             c.category.toLowerCase() == selectedCategory.toLowerCase();
         return matchesSearch && matchesCategory;
       }).toList();
@@ -79,51 +82,50 @@ late Future<List<String>> _categoryFuture;
     _filterCoffees('');
   }
 
- Widget _buildTopBar() {
-  return Positioned(
-    top: 0,
-    left: 0,
-    right: 0,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFFF9A00),
-                  width: 2, // ✅ border width
+  Widget _buildTopBar() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFFF9A00),
+                    width: 2, // ✅ border width
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: MediaQuery.of(context).size.width * 0.09,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: _user.photoURL != null
+                      ? NetworkImage(_user.photoURL!)
+                      : const AssetImage("assets/images/default_avatar.png")
+                            as ImageProvider,
                 ),
               ),
-              child: CircleAvatar(
-                radius: MediaQuery.of(context).size.width * 0.09,
-                backgroundColor: Colors.grey.shade200,
-                backgroundImage: _user.photoURL != null
-                    ? NetworkImage(_user.photoURL!)
-                    : const AssetImage("assets/images/default_avatar.png")
-                        as ImageProvider,
-              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart, color: Color(0xFFFF9A00)),
-            iconSize: 36,
-            onPressed: () => Get.to(() => const AddCartScreen()),
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.shopping_cart, color: Color(0xFFFF9A00)),
+              iconSize: 36,
+              onPressed: () => Get.to(() => const AddCartScreen()),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildSearchBar() {
     return AnimatedSearchBar(
@@ -135,62 +137,61 @@ late Future<List<String>> _categoryFuture;
   }
 
   Widget _buildCategorySelector() {
-  return SizedBox(
-    height: 60,
-    child: ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: _categories.length,
-      itemBuilder: (context, index) {
-        final isSelected = _selectedCategoryIndex == index;
-        return Padding(
-          padding: EdgeInsets.only(
-            left: index == 0 ? 16 : 8,
-            right: index == _categories.length - 1 ? 16 : 8,
-            top: 8,
-            bottom: 8,
-          ),
-          child: GestureDetector(
-            onTap: () => _onCategorySelected(index),
-            child: IntrinsicWidth( 
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16, 
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color.fromARGB(255, 113, 52, 2)
-                      : Colors.transparent,
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFFFF9A00)
-                        : const Color(0xFFFF9A00),
-                    width: 1.5,
+    return SizedBox(
+      height: 60,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _categories.length,
+        itemBuilder: (context, index) {
+          final isSelected = _selectedCategoryIndex == index;
+          return Padding(
+            padding: EdgeInsets.only(
+              left: index == 0 ? 16 : 8,
+              right: index == _categories.length - 1 ? 16 : 8,
+              top: 8,
+              bottom: 8,
+            ),
+            child: GestureDetector(
+              onTap: () => _onCategorySelected(index),
+              child: IntrinsicWidth(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
                   ),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Center(
-                  child: Text(
-                    _categories[index],
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color.fromARGB(255, 113, 52, 2)
+                        : Colors.transparent,
+                    border: Border.all(
                       color: isSelected
-                          ? Colors.white
-                          : const Color.fromARGB(255, 113, 52, 2),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                          ? const Color(0xFFFF9A00)
+                          : const Color(0xFFFF9A00),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _categories[index],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : const Color.fromARGB(255, 113, 52, 2),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      },
-    ),
-  );
-}
-
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildCoffeeGrid() {
     return FutureBuilder<List<Coffee>>(
@@ -224,9 +225,27 @@ late Future<List<String>> _categoryFuture;
               price: coffee.price,
             );
           },
+          physics:
+              const AlwaysScrollableScrollPhysics(),
         );
       },
     );
+  }
+
+  Future<void> _refreshCoffees() async {
+    try {
+      final coffees = await CoffeeApi().getAllCoffees();
+      setState(() {
+        _allCoffees = coffees;
+        _filteredCoffees = coffees;
+        _filterCoffees(_searchController.text);
+      });
+    } catch (e) {
+      debugPrint("Error refreshing coffees: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to refresh coffees')),
+      );
+    }
   }
 
   @override
@@ -245,9 +264,14 @@ late Future<List<String>> _categoryFuture;
                   children: [
                     _buildSearchBar(),
                     const SizedBox(height: 12),
-                    _buildCategorySelector(), // ✅ Added here
+                    _buildCategorySelector(),
                     const SizedBox(height: 16),
-                    Expanded(child: _buildCoffeeGrid()),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _refreshCoffees,
+                        child: _buildCoffeeGrid(),
+                      ),
+                    ),
                   ],
                 ),
               ),

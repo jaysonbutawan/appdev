@@ -8,7 +8,9 @@ class OrderCard extends StatelessWidget {
   final String items;
   final String status;
   final Color statusColor;
-  final VoidCallback? onReorder;
+  final VoidCallback? onButtonTap;
+  final String buttonText;
+  final bool isButtonEnabled; // <-- new property
 
   const OrderCard({
     super.key,
@@ -18,7 +20,9 @@ class OrderCard extends StatelessWidget {
     required this.items,
     required this.status,
     required this.statusColor,
-    this.onReorder,
+    required this.buttonText,
+    required this.isButtonEnabled, // <-- initialize
+    this.onButtonTap,
   });
 
   @override
@@ -75,7 +79,7 @@ class OrderCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
+                    color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -92,17 +96,20 @@ class OrderCard extends StatelessWidget {
           ),
           Container(height: 1, color: Colors.grey[300]),
           InkWell(
-            onTap: onReorder,
+            onTap: isButtonEnabled ? onButtonTap : null,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
+              color: isButtonEnabled ? Colors.transparent : Colors.grey[300],
               child: Center(
                 child: Text(
-                  'Cancel Order',
+                  buttonText,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: const Color(0xFFFF7A30),
+                    color: isButtonEnabled
+                        ? const Color(0xFFFF7A30)
+                        : Colors.grey[600],
                   ),
                 ),
               ),
@@ -113,3 +120,4 @@ class OrderCard extends StatelessWidget {
     );
   }
 }
+

@@ -26,19 +26,19 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   void initState() {
     super.initState();
-    _obscure = widget.obscureText; // initialize with provided value
+    _obscure = widget.obscureText; 
   }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      obscureText: _obscure, // ✅ obscure logic handled here
+      obscureText: _obscure, 
       validator: widget.validator,
-      style: const TextStyle(color: Colors.black), // ✅ text color
+      style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
         labelText: widget.label,
-        labelStyle: const TextStyle(color: Colors.black), // ✅ label color
+        labelStyle: const TextStyle(color: Colors.black), 
         prefixIcon: Icon(widget.icon, color: const Color(0xFF493628)),
         suffixIcon: widget.obscureText
             ? IconButton(
@@ -48,7 +48,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 ),
                 onPressed: () {
                   setState(() {
-                    _obscure = !_obscure; // toggle password visibility
+                    _obscure = !_obscure; 
                   });
                 },
               )

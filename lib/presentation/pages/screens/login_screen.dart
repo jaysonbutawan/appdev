@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:get/get.dart';
-import 'package:quickalert/quickalert.dart';
-
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appdev/presentation/state/providers/auth_provider.dart' as my_auth;
 import 'package:appdev/presentation/widgets/custom_text_field.dart';
 import 'package:appdev/presentation/widgets/auth_button.dart';
 import 'package:appdev/presentation/widgets/divider.dart';
 import 'package:appdev/presentation/widgets/loading_widget.dart';
-import 'package:appdev/presentation/widgets/dialog/app_quick_alert.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,17 +23,28 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordCtrl = TextEditingController();
 
   Future<void> _login(my_auth.AuthProvider auth) async {
-    if (!_formKey.currentState!.validate()) return;
+  if (!_formKey.currentState!.validate()) return;
 
-    try {
-      await auth.login(
-        email: emailCtrl.text.trim(),
-        password: passwordCtrl.text.trim(),
-      );
-    } catch (e) {
-      _showErrorAlert("Login Failed", e.toString(), const Color(0xFFFF7A30));
+  try {
+    await auth.login(
+      email: emailCtrl.text.trim(),
+      password: passwordCtrl.text.trim(),
+    );
+  } on FirebaseAuthException catch (e) {
+    String message = "Login failed. Please try again.";
+    if (e.code == "user-not-found") {
+      message = "User not found. Please sign up first.";
+    } else if (e.code == "wrong-password") {
+      message = "Incorrect password. Try again.";
+    } else if (e.code == "invalid-email") {
+      message = "Email is badly formatted.";
     }
+
+    _showErrorAlert("Login Failed", message, const Color(0xFFFF7A30));
+  } catch (e) {
+    _showErrorAlert("Login Failed", e.toString(), const Color(0xFFFF7A30));
   }
+}
 
   Future<void> _signInWithGoogle(my_auth.AuthProvider auth) async {
     try {
@@ -44,6 +53,25 @@ class _LoginScreenState extends State<LoginScreen> {
       _showErrorAlert("Google Sign-in Failed", e.toString(), Colors.red);
     }
   }
+
+    void _showErrorAlert(String title, String text, Color btnColor) {
+  if (!mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(title),
+      content: Text(text),
+      actions: [
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: btnColor),
+          onPressed: () => Navigator.pop(context),
+          child: const Text("OK"),
+        ),
+      ],
+    ),
+  );
+}
   
   @override
   Widget build(BuildContext context) {
@@ -70,18 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showErrorAlert(String title, String text, Color btnColor) {
-    if (!mounted) return;
-    AppQuickAlert.show(
-      context: context,
-      type: QuickAlertType.error,
-      title: title,
-      text: text,
-      confirmBtnText: "OK",
-      confirmBtnColor: btnColor,
     );
   }
 

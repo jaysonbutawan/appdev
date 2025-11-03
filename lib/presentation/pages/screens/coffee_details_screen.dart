@@ -1,11 +1,11 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:appdev/core/themes/app_gradient.dart';
 import 'package:appdev/data/models/product.dart';
 import 'package:appdev/presentation/widgets/product/product_header.dart';
 import 'package:appdev/presentation/widgets/product/product_image.dart';
 import 'package:appdev/presentation/widgets/product/product_size_selector.dart';
 import 'package:appdev/utils/cart_helper.dart';
-import 'package:appdev/presentation/pages/screens/checkout_screen.dart'; // 👈 import checkout
+import 'package:appdev/presentation/pages/screens/checkout_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -20,7 +20,7 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  String? _selectedSize; // 🧩 store selected size
+  String? _selectedSize; 
 
   void _onSizeSelected(String size) {
     setState(() {
@@ -36,7 +36,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppGradients.mainBackground),
+        color: Colors.brown,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -118,13 +118,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          if (_selectedSize == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Please select a size first.")),
-            );
-            return;
-          }
-
+         
+           Flushbar(
+            message: "Added to your cart.",
+            duration: const Duration(seconds: 2),
+            flushbarPosition: FlushbarPosition.TOP,
+            backgroundColor: Colors.redAccent,
+            icon: const Icon(Icons.done, color: Colors.white),
+          ).show(context);
           handleAddToCart(context, product.id, product.name, size: _selectedSize);
         },
         style: ElevatedButton.styleFrom(
@@ -152,10 +153,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: ElevatedButton(
         onPressed: () {
           if (_selectedSize == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Please select a size first.")),
-            );
-            return;
+           Flushbar(
+            message: "Please select a size first.",
+            duration: const Duration(seconds: 2),
+            flushbarPosition: FlushbarPosition.TOP,
+            backgroundColor: Colors.redAccent,
+            icon: const Icon(Icons.error, color: Colors.white),
+          ).show(context);
+          return;
           }
 
           final orderItem = {

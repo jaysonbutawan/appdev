@@ -3,7 +3,7 @@ import 'package:appdev/data/models/coffee.dart';
 import 'package:flutter/material.dart';
 import 'package:appdev/data/services/coffee_service.dart';
 class CheckoutController extends ChangeNotifier {
-  final CoffeeApi _coffeeApi = CoffeeApi(); // 👈 create an instance
+  final CoffeeApi _coffeeApi = CoffeeApi();
 
   bool isPickup = true;
   double subtotal = 0.0;
@@ -20,14 +20,13 @@ class CheckoutController extends ChangeNotifier {
     List<Cart>? cartItems,
     Coffee? directCoffee,
   }) async {
-    final success = await _coffeeApi.createOrder(  // 👈 call via _coffeeApi
+    final success = await _coffeeApi.createOrder(  
       userId: userId,
       cartItems: cartItems,
       directCoffee: directCoffee,
     );
 
     if (success) {
-      // ✅ Do something (clear cart, show snackbar, etc.)
       print("Order created successfully!");
     } else {
       print("Order failed!");

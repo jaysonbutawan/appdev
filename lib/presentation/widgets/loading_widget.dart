@@ -30,7 +30,6 @@ class _AppStateHandlerState extends State<AppStateHandler> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔴 Show Circular Loader when offline
     if (_isOffline) {
       return const Scaffold(
         body: Center(
@@ -39,7 +38,6 @@ class _AppStateHandlerState extends State<AppStateHandler> {
       );
     }
 
-    // 🔵 Show Circular Loader when app is busy
     if (widget.isLoading) {
       return const Scaffold(
         body: Center(
@@ -47,8 +45,6 @@ class _AppStateHandlerState extends State<AppStateHandler> {
         ),
       );
     }
-
-    // 🟢 Normal app UI
     return widget.child;
   }
 }

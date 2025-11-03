@@ -15,11 +15,13 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> {
   late Future<List<dynamic>> _ordersFuture;
   String _selectedFilter = 'All';
+  String? _user_id;
 
   @override
   void initState() {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
+    _user_id = user?.uid;
     _ordersFuture = user != null
         ? OrderService.getUserOrders(user.uid)
         : Future.value([]);
@@ -43,13 +45,14 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   String _formatItems(dynamic items) {
-    // ✅ Handle both List and String safely
     if (items == null) return "No items";
     if (items is String) return items.isEmpty ? "No items" : items;
     if (items is List && items.isNotEmpty) {
       return items
-          .map((i) =>
-              "${i['coffee_name'] ?? i['name'] ?? 'Item'} (${i['size'] ?? '—'}) x${i['quantity'] ?? 1}")
+          .map(
+            (i) =>
+                "${i['coffee_name'] ?? i['name'] ?? 'Item'} (${i['size'] ?? '—'}) x${i['quantity'] ?? 1}",
+          )
           .join(", ");
     }
     return "No items";
@@ -62,10 +65,7 @@ class _OrderScreenState extends State<OrderScreen> {
       appBar: AppBar(
         title: Text(
           'User Order History',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -87,64 +87,83 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
           _buildFilterTabs(),
           Expanded(
-            child: FutureBuilder<List<dynamic>>(
-              future: _ordersFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            child: RefreshIndicator(
+              onRefresh:
+                  _loadOrders, 
+              child: FutureBuilder<List<dynamic>>(
+                future: _ordersFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Error: ${snapshot.error}",
-                      style: GoogleFonts.inter(color: Colors.red),
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No orders found."));
-                }
-
-                final allOrders = snapshot.data!;
-                final filteredOrders = _selectedFilter == "All"
-                    ? allOrders
-                    : allOrders.where((order) {
-                        final status = order["status"]?.toLowerCase() ?? "";
-                        if (_selectedFilter == "Active") {
-                          return [
-                            "pending",
-                            "accepted",
-                            "preparing",
-                            "ready"
-                          ].contains(status);
-                        } else if (_selectedFilter == "Past") {
-                          return ["completed", "cancelled"].contains(status);
-                        }
-                        return true;
-                      }).toList();
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredOrders.length,
-                  itemBuilder: (context, index) {
-                    final order = filteredOrders[index];
-                    final items = order["items"];
-
-                    return OrderCard(
-                      storeName: order["store_name"] ?? "Unknown Store",
-                      orderDate: order["created_at"] ?? "",
-                      totalAmount: "${order["total_amount"] ?? 0}",
-                      items: _formatItems(items),
-                      status: order["status"] ?? "Unknown",
-                      statusColor:
-                          _getStatusColor(order["status"] ?? "Unknown"),
-                      onReorder: () => cancelOrder(order),
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        "Error: ${snapshot.error}",
+                        style: GoogleFonts.inter(color: Colors.red),
+                      ),
                     );
-                  },
-                );
-              },
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text("No orders found."));
+                  }
+
+                  final allOrders = snapshot.data!;
+                  final filteredOrders = _selectedFilter == "All"
+                      ? allOrders
+                      : allOrders.where((order) {
+                          final status = order["status"]?.toLowerCase() ?? "";
+                          if (_selectedFilter == "Active") {
+                            return [
+                              "pending",
+                              "accepted",
+                              "preparing",
+                              "ready",
+                            ].contains(status);
+                          } else if (_selectedFilter == "Past") {
+                            return ["completed", "cancelled"].contains(status);
+                          }
+                          return true;
+                        }).toList();
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredOrders.length,
+                    itemBuilder: (context, index) {
+                      final order = filteredOrders[index];
+                      final items = order["items"];
+                      final status = (order["status"] ?? "").toLowerCase();
+                      final isButtonEnabled = status != "completed";
+
+                      return OrderCard(
+                        storeName: order["store_name"] ?? "Unknown Store",
+                        orderDate: order["created_at"] ?? "",
+                        totalAmount: "${order["total_amount"] ?? 0}",
+                        items: _formatItems(items),
+                        status: order["status"] ?? "Unknown",
+                        statusColor: _getStatusColor(
+                          order["status"] ?? "Unknown",
+                        ),
+                        buttonText:
+                            (status == "ready" || status == "ready for pick up")
+                            ? "Confirm Order"
+                            : "Cancel Order",
+                        isButtonEnabled: isButtonEnabled,
+                        onButtonTap: () {
+                          if (status == "ready" ||
+                              status == "ready for pick up") {
+                            completeOrder(order);
+                          } else if (status != "completed") {
+                            cancelOrder(order);
+                          }
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -176,8 +195,9 @@ class _OrderScreenState extends State<OrderScreen> {
                     filter,
                     style: GoogleFonts.inter(
                       color: isSelected ? Colors.white : Colors.grey[600],
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 14,
                     ),
                   ),
@@ -190,85 +210,145 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-void cancelOrder(Map<String, dynamic> order) async {
-  final orderId = order['order_id']?.toString() ?? '';
+  void cancelOrder(Map<String, dynamic> order) async {
+    final orderId = order['order_id']?.toString() ?? '';
 
-  if (orderId.isEmpty) {
-    Flushbar(
-      message: "Invalid order ID.",
-      duration: const Duration(seconds: 3),
-      flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor: Colors.redAccent,
-    ).show(context);
-    return;
-  }
+    if (orderId.isEmpty) {
+      Flushbar(
+        message: "Invalid order ID.",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: Colors.redAccent,
+      ).show(context);
+      return;
+    }
 
-  final status = order['status']?.toString().toLowerCase() ?? '';
-  if (status == 'cancelled' || status == 'completed') {
-    Flushbar(
-      message: "Order is already $status).",
-      duration: const Duration(seconds: 3),
-      flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor:  const Color(0xFFFF9A00),
-    ).show(context);
-    return;
-  }
+    final status = order['status']?.toString().toLowerCase() ?? '';
+    if (status == 'cancelled' || status == 'completed') {
+      Flushbar(
+        message: "Order is already $status).",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: const Color(0xFFFF9A00),
+      ).show(context);
+      return;
+    }
 
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text("Cancel Order"),
-      content: const Text("You want to cancel this order? This action cannot be undone and no refund."),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text("No"),
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Cancel Order"),
+        content: const Text(
+          "You want to cancel this order? This action cannot be undone and no refund.",
         ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text("Yes, Cancel"),
-        ),
-      ],
-    ),
-  );
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("No"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yes, Cancel"),
+          ),
+        ],
+      ),
+    );
 
-  if (confirm != true) return;
+    if (confirm != true) return;
 
-  Flushbar(
-    message: "Cancelling order...",
-    duration: const Duration(seconds: 2),
-    flushbarPosition: FlushbarPosition.TOP,
-    backgroundColor: Colors.blueAccent,
-  ).show(context);
-
-  final success = await OrderService.cancelOrder(orderId);
-
-  if (success) {
     Flushbar(
-      message: "Order cancelled successfully.",
-      duration: const Duration(seconds: 3),
+      message: "Cancelling order...",
+      duration: const Duration(seconds: 2),
       flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor: const Color.fromARGB(255, 113, 52, 2),
+      backgroundColor: Colors.blueAccent,
     ).show(context);
-    await _loadOrders();
-  } else {
-    Flushbar(
-      message: "Failed to cancel order.",
-      duration: const Duration(seconds: 3),
-      flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor: const Color(0xFFFF9A00),
-    ).show(context);
+
+    final success = await OrderService.cancelOrder(orderId, _user_id ?? '');
+
+    if (success) {
+      Flushbar(
+        message: "Order cancelled successfully.",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: const Color.fromARGB(255, 113, 52, 2),
+      ).show(context);
+      await _loadOrders();
+    } else {
+      Flushbar(
+        message: "Failed to cancel order.",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: const Color(0xFFFF9A00),
+      ).show(context);
+    }
   }
-}
 
-Future<void> _loadOrders() async {
-  final user = FirebaseAuth.instance.currentUser;
-  setState(() {
-    _ordersFuture = user != null
-        ? OrderService.getUserOrders(user.uid)
-        : Future.value([]);
-  });
-}
+  void completeOrder(Map<String, dynamic> order) async {
+    final orderId = order['order_id']?.toString() ?? '';
 
+    if (orderId.isEmpty) {
+      Flushbar(
+        message: "Invalid order ID.",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: Colors.redAccent,
+      ).show(context);
+      return;
+    }
 
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Order"),
+        content: const Text("Do you want to confirm this order as completed?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("No"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yes, Confirm"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    Flushbar(
+      message: "Updating order status...",
+      duration: const Duration(seconds: 2),
+      flushbarPosition: FlushbarPosition.TOP,
+      backgroundColor: Colors.blueAccent,
+    ).show(context);
+
+    final success = await OrderService.completeOrder(orderId, _user_id ?? '');
+
+    if (success) {
+      Flushbar(
+        message: "Order confirmed as completed.",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: const Color.fromARGB(255, 113, 52, 2),
+      ).show(context);
+      await _loadOrders();
+    } else {
+      Flushbar(
+        message: "Failed to update order.",
+        duration: const Duration(seconds: 3),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: const Color(0xFFFF9A00),
+      ).show(context);
+    }
+  }
+
+  Future<void> _loadOrders() async {
+    final user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      _ordersFuture = user != null
+          ? OrderService.getUserOrders(user.uid)
+          : Future.value([]);
+    });
+  }
 }

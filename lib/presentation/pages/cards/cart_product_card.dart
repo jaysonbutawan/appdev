@@ -8,7 +8,6 @@ class ProductCard extends StatelessWidget {
   final Uint8List? imageBytes;
   final int quantity;
 
-  // ✅ Add callbacks
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onRemove;
